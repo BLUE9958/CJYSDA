@@ -1,0 +1,516 @@
+:root {
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --success-color: #4ecdc4;
+    --danger-color: #ff6b6b;
+    --warning-color: #ffd166;
+    --dark-color: #2d3436;
+    --light-color: #f8f9fa;
+    --gray-color: #adb5bd;
+    --border-radius: 12px;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    color: var(--dark-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 头部样式 */
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 30px;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.header h1 {
+    font-size: 2.8rem;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: var(--gray-color);
+    font-size: 1.1rem;
+}
+
+/* 主要内容区域 */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+/* 动画组合展示区域 */
+.preset-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--shadow);
+}
+
+.preset-section h2 {
+    font-size: 1.8rem;
+    color: var(--dark-color);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.preset-section p {
+    color: var(--gray-color);
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+/* 下拉框样式 */
+.preset-dropdown {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 16px;
+    border: 2px solid var(--light-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    background: white;
+    color: var(--dark-color);
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preset-dropdown:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.preset-dropdown:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* 动画组合卡片网格 */
+.preset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+/* 动画组合卡片 */
+.preset-card {
+    background: var(--light-color);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.preset-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.preset-card.selected {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+}
+
+.preset-card h3 {
+    font-size: 1rem;
+    color: var(--dark-color);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.preset-card p {
+    color: var(--gray-color);
+    margin-bottom: 12px;
+    line-height: 1.4;
+    font-size: 0.85rem;
+}
+
+/* 动画效果展示 */
+.preset-effects {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.effect-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    background: white;
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-color);
+}
+
+.effect-name {
+    font-weight: 600;
+    color: var(--dark-color);
+    font-size: 0.8rem;
+}
+
+.effect-type {
+    font-size: 0.7rem;
+    color: var(--gray-color);
+    background: var(--light-color);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* 预览区域 */
+.preview-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--shadow);
+}
+
+.preview-section h2 {
+    font-size: 1.8rem;
+    color: var(--dark-color);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* 预览容器 */
+.preview-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    background: #f0f2f5;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+/* 页面样式 */
+.page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.page.active {
+    z-index: 2;
+}
+
+.new-page {
+    z-index: 1;
+}
+
+.page-content {
+    border-radius: 8px;
+    padding: 0;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 页面图片样式 */
+.page-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* 页面A样式 */
+.current-page .page-content {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid var(--primary-color);
+}
+
+/* 页面B样式 */
+.new-page .page-content {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border: 2px solid var(--success-color);
+}
+
+.page-content h3 {
+    margin: 10px 0;
+    color: var(--dark-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.page-rectangle {
+    width: 90%;
+    height: 70%;
+    border-radius: 8px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.5rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.current-page .page-rectangle {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+.new-page .page-rectangle {
+    background: linear-gradient(135deg, var(--success-color), var(--primary-color));
+}
+
+.page-rectangle::before {
+    content: attr(data-page);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* 页面标识 */
+.page-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--dark-color);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.current-page .page-badge {
+    border: 2px solid var(--primary-color);
+}
+
+.new-page .page-badge {
+    border: 2px solid var(--success-color);
+}
+
+/* 控制按钮 */
+.control-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+    justify-content: center;
+}
+
+/* 代码编辑区域 */
+.code-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--shadow);
+}
+
+.code-section h2 {
+    font-size: 1.8rem;
+    color: var(--dark-color);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.code-section p {
+    color: var(--gray-color);
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+/* 代码编辑器容器 */
+.code-editor-container {
+    background: var(--dark-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+/* 代码编辑器头部 */
+.code-header {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.code-header h3 {
+    color: white;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.code-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* 小型按钮 */
+.btn.small {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+}
+
+/* 代码编辑器 */
+.code-editor-container pre {
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    max-height: 400px;
+}
+
+.code-editor-container code {
+    display: block;
+    padding: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #f8f8f2;
+    background: transparent;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.code-editor-container code:focus {
+    outline: none;
+}
+
+/* 代码编辑提示 */
+.code-tips {
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 4px solid var(--primary-color);
+    padding: 15px;
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+.code-tips p {
+    margin: 0;
+    color: var(--dark-color);
+    font-size: 0.95rem;
+}
+
+/* 按钮样式 */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn.primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+}
+
+.btn.secondary {
+    background: var(--gray-color);
+    color: var(--dark-color);
+}
+
+.btn.danger {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .preset-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .control-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .page-content h3 {
+        font-size: 1.5rem;
+    }
+    
+    .preview-container {
+        height: 300px;
+    }
+    
+    .code-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .code-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .code-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+}

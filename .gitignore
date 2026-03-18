@@ -1,0 +1,27 @@
+# 忽略文件
+node_modules/
+__pycache__/
+*.pyc
+*.log
+*.swp
+*.swo
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# 忽略编辑器文件
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# 忽略测试文件
+test_*.py
+
+# 忽略动画生成的GIF文件（如果需要提交可以删除这行）
+animated_gifs/
+animated_gifs_emphasis/
+animated_gifs_exit/

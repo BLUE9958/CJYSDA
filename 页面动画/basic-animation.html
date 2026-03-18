@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基础运镜推近动画</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        
+        .animation-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+            overflow: hidden;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .page img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        #playBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        #resetBtn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>运镜推近动画效果</h1>
+        
+        <div class="animation-container">
+            <div class="page" id="page1">
+                <img src="A.png" alt="页面1">
+            </div>
+            <div class="page" id="page2">
+                <img src="B.png" alt="页面2">
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="playBtn">播放动画</button>
+            <button id="resetBtn">重置</button>
+        </div>
+    </div>
+    
+    <script>
+        // 页面加载完成后执行
+        window.onload = function() {
+            console.log('页面加载完成');
+            
+            // 初始化页面状态
+            resetAnimation();
+            
+            // 绑定按钮事件
+            document.getElementById('playBtn').onclick = playAnimation;
+            document.getElementById('resetBtn').onclick = resetAnimation;
+            
+            console.log('事件绑定完成');
+        };
+        
+        // 播放动画
+        function playAnimation() {
+            console.log('开始播放动画');
+            
+            var page1 = document.getElementById('page1');
+            var page2 = document.getElementById('page2');
+            
+            // 确保元素存在
+            if (!page1 || !page2) {
+                console.error('页面元素未找到');
+                return;
+            }
+            
+            // 重置状态
+            gsap.set(page1, { opacity: 1, scale: 1, zIndex: 1 });
+            gsap.set(page2, { opacity: 0, scale: 1.2, zIndex: 2 });
+            
+            // 创建时间线
+            var tl = gsap.timeline();
+            
+            // 页面1退出动画
+            tl.to(page1, {
+                opacity: 0,
+                scale: 1.2,
+                duration: 0.8,
+                ease: "power2.inOut"
+            });
+            
+            // 页面2进入动画
+            tl.to(page2, {
+                opacity: 1,
+                scale: 1,
+                duration: 0.8,
+                ease: "power2.inOut"
+            }, "-=0.6");
+            
+            console.log('动画创建完成');
+        }
+        
+        // 重置动画
+        function resetAnimation() {
+            console.log('重置动画');
+            
+            var page1 = document.getElementById('page1');
+            var page2 = document.getElementById('page2');
+            
+            // 确保元素存在
+            if (!page1 || !page2) {
+                console.error('页面元素未找到');
+                return;
+            }
+            
+            // 重置状态
+            gsap.set(page1, { opacity: 1, scale: 1, zIndex: 1 });
+            gsap.set(page2, { opacity: 0, scale: 1, zIndex: 0 });
+            
+            console.log('动画重置完成');
+        }
+    </script>
+</body>
+</html>

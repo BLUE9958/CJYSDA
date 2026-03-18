@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>场景演示大师1.0 - 下一版本规划</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* 苹果发布会暗黑主题配色 */
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --text-light: #a1a1a6;
+            --accent-color: #8b5cf6;
+            --accent-light: #a78bfa;
+            --border-color: #2c2c2e;
+            --section-padding: 60px 20px;
+            --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            overflow-x: hidden;
+        }
+
+        /* Section Styles */
+        section {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: var(--section-padding);
+            background-color: var(--bg-color);
+        }
+
+        .section-inner {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Title Styles */
+        h2 {
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            text-align: center;
+            letter-spacing: -0.01em;
+        }
+
+        h4 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 20px 0 15px;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        /* Content Styles */
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .intro-text {
+            font-size: 1.3rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 60px;
+            color: var(--text-light);
+        }
+
+        /* Divider */
+        .divider {
+            width: 60px;
+            height: 4px;
+            background: var(--accent-color);
+            margin: 40px auto;
+            border-radius: 2px;
+        }
+
+        /* Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px 30px;
+            border-radius: 12px;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        .card p {
+            text-align: left;
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .value-desc {
+            text-align: left;
+            color: var(--accent-light);
+            font-size: 0.95rem;
+            padding: 15px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .value-desc strong {
+            color: var(--accent-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 2rem;
+            }
+
+            .intro-text {
+                font-size: 1.1rem;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            section {
+                padding: 40px 20px;
+            }
+
+            .card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Roadmap -->
+        <section id="roadmap">
+            <div class="section-inner">
+                <h2>下一版本规划</h2>
+                <div class="divider"></div>
+                <p class="intro-text">持续创新，增强产品功能，为用户带来更强大的创作能力</p>
+                
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>辅助编辑功能</h4>
+                        <p>参考线、对齐和平均分布功能、标尺系统，提升编辑精度和效率</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>提升编辑精度和效率，帮助客户打造更专业的场景
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>控点打组功能</h4>
+                        <p>支持控点分组管理，提升复杂场景的编辑效率，降低创作难度</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>提升复杂场景的编辑效率，降低创作难度
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>AI生成图片</h4>
+                        <p>通过AI生成场景所需图片资源，降低外部依赖，节省创作成本</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>降低对外部图片资源的依赖，节省创作成本
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>数字人讲解</h4>
+                        <p>自动生成数字人讲解内容，丰富场景展示形式，提升交互体验</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>丰富场景展示形式，提升交互体验
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>更多模板资源</h4>
+                        <p>持续更新行业场景模板，降低创作门槛，缩短项目交付周期</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>降低创作门槛，缩短项目交付周期
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>更多控点资源</h4>
+                        <p>丰富控点类型，满足多样化创作需求，提升产品适用性</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>满足多样化创作需求，提升产品适用性
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

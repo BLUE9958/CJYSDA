@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>场景演示大师1.0 - 企业版功能发布</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* 苹果发布会暗黑主题配色 */
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --text-light: #a1a1a6;
+            --accent-color: #8b5cf6;
+            --accent-light: #a78bfa;
+            --border-color: #2c2c2e;
+            --section-padding: 60px 20px;
+            --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            overflow-x: hidden;
+        }
+
+        /* Section Styles */
+        section {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: var(--section-padding);
+            background-color: var(--bg-color);
+        }
+
+        .section-inner {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Title Styles */
+        h2 {
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            text-align: center;
+            letter-spacing: -0.01em;
+        }
+
+        h4 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 20px 0 15px;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        /* Content Styles */
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .intro-text {
+            font-size: 1.3rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 60px;
+            color: var(--text-light);
+        }
+
+        /* Divider */
+        .divider {
+            width: 60px;
+            height: 4px;
+            background: var(--accent-color);
+            margin: 40px auto;
+            border-radius: 2px;
+        }
+
+        /* Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px 30px;
+            border-radius: 12px;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        .card p {
+            text-align: left;
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .value-desc {
+            text-align: left;
+            color: var(--accent-light);
+            font-size: 0.95rem;
+            padding: 15px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .value-desc strong {
+            color: var(--accent-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 2rem;
+            }
+
+            .intro-text {
+                font-size: 1.1rem;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            section {
+                padding: 40px 20px;
+            }
+
+            .card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Enterprise Edition -->
+        <section id="enterprise">
+            <div class="section-inner">
+                <h2>企业版功能发布</h2>
+                <div class="divider"></div>
+                <p class="intro-text">专为团队协作与资产安全管理设计，满足企业级客户需求</p>
+                
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>团队工作空间</h4>
+                        <p>创建专属团队空间，统一管理项目与素材，实现资源共享，提升团队工作效率</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>解决多团队协作痛点，提升团队工作效率，统一管理项目与素材
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>精细化权限体系</h4>
+                        <p>企业-团队-项目三级控制，数字资产集中管控，安全协作机制，降低数据泄露风险</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>满足企业对数字资产安全的需求，降低数据泄露风险，实现安全协作
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>企业级架构</h4>
+                        <p>支持多团队管理，适配复杂组织架构，企业资源统一管控，满足大型企业需求</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>适配复杂组织架构，满足大型企业管理需求，实现资源统一管控
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>完善项目管理</h4>
+                        <p>多种项目模式选择，项目分类与文件夹管理，项目卡片展示与批量操作</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>提升项目管理效率，降低管理成本，优化项目生命周期管理
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

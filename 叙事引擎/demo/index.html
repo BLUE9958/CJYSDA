@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>叙事引擎编辑页</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部工具栏 - 精简版 -->
+        <header class="top-toolbar">
+            <div class="toolbar-left">
+                <div class="logo">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>叙事引擎</span>
+                </div>
+                <div class="toolbar-divider"></div>
+                <div class="narrative-info">
+                    <input type="text" class="narrative-name-input" placeholder="未命名叙事线" value="产品功能演示">
+                    <span class="save-status">已保存</span>
+                </div>
+            </div>
+            
+            <div class="toolbar-right">
+                <button class="toolbar-btn icon-btn" id="settingsBtn" title="设置">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </button>
+                <button class="toolbar-btn primary" id="saveBtn" title="保存">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <polyline points="17 21 17 13 7 13 7 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>保存</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 左侧：预览区 + 播放控制（整合） -->
+            <section class="preview-section">
+                <div class="preview-container">
+                    <div class="scene-canvas" id="sceneCanvas">
+                        <div class="control-point" data-control-id="1" style="top: 25%; left: 35%;">
+                            <div class="control-point-inner">
+                                <span class="control-icon">📱</span>
+                                <span class="control-label">功能入口</span>
+                            </div>
+                        </div>
+                        <div class="control-point" data-control-id="2" style="top: 55%; left: 55%;">
+                            <div class="control-point-inner">
+                                <span class="control-icon">📋</span>
+                                <span class="control-label">产品介绍</span>
+                            </div>
+                        </div>
+                        <div class="control-point" data-control-id="3" style="top: 75%; left: 25%;">
+                            <div class="control-point-inner">
+                                <span class="control-icon">↩️</span>
+                                <span class="control-label">返回</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 播放控制区 - 整合在预览区底部 -->
+                <div class="playback-control-bar">
+                    <div class="playback-main">
+                        <button class="playback-btn play-btn" id="playBtn" title="播放">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M5 3L19 12L5 21V3Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <button class="playback-btn stop-btn" id="stopBtn" title="停止">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                <rect x="6" y="6" width="12" height="12" fill="currentColor"/>
+                            </svg>
+                        </button>
+                        <div class="playback-divider"></div>
+                        <div class="playback-info-compact">
+                            <span class="playback-time">00:00</span>
+                            <span class="playback-separator">/</span>
+                            <span class="playback-total">00:15</span>
+                        </div>
+                    </div>
+                    
+                    <div class="playback-progress-wrapper">
+                        <div class="playback-progress-track">
+                            <div class="playback-progress-fill" style="width: 33%"></div>
+                            <div class="playback-progress-handle" style="left: 33%"></div>
+                        </div>
+                        <div class="playback-progress-labels">
+                            <span>节点 1</span>
+                            <span>节点 2</span>
+                            <span>节点 3</span>
+                        </div>
+                    </div>
+                    
+                    <div class="playback-modes">
+                        <button class="mode-btn active" data-mode="final" title="最终状态">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+                                <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button class="mode-btn" data-mode="play" title="播放预览">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M10 8L16 12L10 16V8Z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 右侧：节点时间轴（核心区域，占比增大） -->
+            <section class="timeline-section">
+                <!-- 自动描述 - 更醒目 -->
+                <div class="auto-description-card">
+                    <div class="description-badge">当前操作</div>
+                    <div class="description-text" id="autoDescription">跳转至功能详情页</div>
+                </div>
+
+                <!-- 节点时间轴 - 核心区域 -->
+                <div class="timeline-container">
+                    <div class="timeline-header">
+                        <div class="timeline-title-group">
+                            <span class="timeline-title">节点时间轴</span>
+                            <span class="timeline-count">3 个节点</span>
+                        </div>
+                        <div class="timeline-actions">
+                            <button class="timeline-action-btn" id="addNodeBtn" title="添加节点">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                    <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                    <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                添加
+                            </button>
+                        </div>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="node-list" id="nodeList">
+                            <div class="node-item active" data-node-id="1">
+                                <div class="node-indicator">
+                                    <div class="node-number">1</div>
+                                    <div class="node-line"></div>
+                                </div>
+                                <div class="node-card">
+                                    <div class="node-main">
+                                        <div class="node-header">
+                                            <span class="node-name">操作1</span>
+                                            <div class="node-actions">
+                                                <button class="action-btn" title="复制">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/>
+                                                    </svg>
+                                                </button>
+                                                <button class="action-btn" title="删除">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                        <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"/>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="node-meta">
+                                            <span class="node-type">跳转场景</span>
+                                            <span class="node-control">功能入口</span>
+                                        </div>
+                                    </div>
+                                    <button class="node-edit-btn" title="编辑">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="node-item" data-node-id="2">
+                                <div class="node-indicator">
+                                    <div class="node-number">2</div>
+                                    <div class="node-line"></div>
+                                </div>
+                                <div class="node-card">
+                                    <div class="node-main">
+                                        <div class="node-header">
+                                            <span class="node-name">操作2</span>
+                                            <div class="node-actions">
+                                                <button class="action-btn" title="复制">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/>
+                                                    </svg>
+                                                </button>
+                                                <button class="action-btn" title="删除">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                        <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"/>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="node-meta">
+                                            <span class="node-type">内容弹窗</span>
+                                            <span class="node-control">产品介绍</span>
+                                        </div>
+                                    </div>
+                                    <button class="node-edit-btn" title="编辑">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="node-item" data-node-id="3">
+                                <div class="node-indicator">
+                                    <div class="node-number">3</div>
+                                </div>
+                                <div class="node-card">
+                                    <div class="node-main">
+                                        <div class="node-header">
+                                            <span class="node-name">操作3</span>
+                                            <div class="node-actions">
+                                                <button class="action-btn" title="复制">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/>
+                                                    </svg>
+                                                </button>
+                                                <button class="action-btn" title="删除">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                                        <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"/>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="node-meta">
+                                            <span class="node-type">关闭弹窗</span>
+                                            <span class="node-control">返回</span>
+                                        </div>
+                                    </div>
+                                    <button class="node-edit-btn" title="编辑">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 交互事件序列 - 压缩展示 -->
+                <div class="event-sequence-container">
+                    <div class="event-header">
+                        <span class="event-title">事件序列</span>
+                        <span class="event-count">3 个事件</span>
+                    </div>
+                    <div class="event-list-compact" id="eventList">
+                        <div class="event-item-compact">
+                            <div class="event-step">1</div>
+                            <div class="event-info">
+                                <span class="event-name">点击控点</span>
+                                <span class="event-arrow">→</span>
+                            </div>
+                        </div>
+                        <div class="event-item-compact">
+                            <div class="event-step">2</div>
+                            <div class="event-info">
+                                <span class="event-name">跳转场景</span>
+                                <span class="event-arrow">→</span>
+                            </div>
+                        </div>
+                        <div class="event-item-compact">
+                            <div class="event-step">3</div>
+                            <div class="event-info">
+                                <span class="event-name">页面加载</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 节点编辑弹窗 -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal" id="nodeEditModal">
+        <div class="modal-header">
+            <h3>编辑节点</h3>
+            <button class="modal-close" id="modalClose">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>节点名称</label>
+                <input type="text" class="form-input" id="nodeName" value="操作1" placeholder="输入节点名称">
+            </div>
+            <div class="form-group">
+                <label>操作类型</label>
+                <select class="form-select" id="operationType">
+                    <option value="jump_scene">点击控点-跳转场景</option>
+                    <option value="show_popup">点击控点-内容弹窗</option>
+                    <option value="show_hide">点击控点-显示隐藏</option>
+                    <option value="close_popup">点击控点-关闭弹窗</option>
+                    <option value="nav_switch">导航栏切换</option>
+                    <option value="close_button">点击弹窗关闭按钮</option>
+                    <option value="highlight">点击控点-高亮聚焦</option>
+                    <option value="camera_move">点击控点-镜头</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>操作控点</label>
+                <input type="text" class="form-input" id="controlId" value="功能入口" placeholder="选择或输入控点">
+            </div>
+            <div class="form-group" id="targetSceneGroup">
+                <label>目标场景页</label>
+                <select class="form-select" id="targetSceneId">
+                    <option value="">请选择</option>
+                    <option value="2">功能详情页</option>
+                    <option value="3">设置页面</option>
+                    <option value="4">帮助中心</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn secondary" id="cancelBtn">取消</button>
+            <button class="btn primary" id="saveBtn">保存</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

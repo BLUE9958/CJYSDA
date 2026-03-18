@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&display=swap');
+        body { font-family: 'Noto Sans SC', sans-serif; }
+        
+        .connector-line {
+            position: absolute; left: 26px; width: 2px;
+            background: #475569; z-index: 0;
+        }
+        .line-after { height: 40px; top: -40px; background: #6366f1; }
+        .line-with { 
+            height: 50px; top: -50px; width: 15px; 
+            border-left: 2px dashed #475569; border-bottom: 2px dashed #475569; 
+            border-bottom-left-radius: 8px; background: transparent; 
+        }
+        .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+    </style>
+</head>
+<body class="bg-[#0f172a] text-slate-300 flex justify-end h-screen overflow-hidden">
+
+    <aside class="w-[380px] bg-[#0b0f1a] border-l border-white/10 flex flex-col shadow-2xl relative">
+        <div class="p-6 border-b border-white/5">
+            <h2 class="text-sm font-bold text-white uppercase tracking-wider">交互编排</h2>
+            <p class="text-[10px] text-slate-500 mt-1">设置点击此对象后的执行序列</p>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-10 pb-24" id="chain-container">
+            
+            <div class="relative bg-slate-900/60 border border-white/5 p-4 rounded-xl shadow-lg">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center text-white text-[10px] font-bold shadow-lg shadow-indigo-600/20">1</span>
+                        <h4 class="text-xs font-bold text-white">弹出内容</h4>
+                    </div>
+                    <button onclick="openSettings('弹出内容', '设置弹窗的内容、样式及关闭逻辑')" class="text-slate-500 hover:text-indigo-400 transition"><i class="fas fa-cog"></i></button>
+                </div>
+                <div class="text-[10px] text-slate-500 font-mono">
+                    <i class="far fa-clock mr-1"></i> 耗时: 瞬时 (0ms)
+                </div>
+            </div>
+
+            <div class="relative bg-slate-900/60 border border-white/5 p-4 rounded-xl shadow-lg">
+                <div class="connector-line line-after" id="line-2"></div>
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 bg-slate-700 rounded-md flex items-center justify-center text-white text-[10px] font-bold">2</span>
+                        <select onchange="updateLine(2, this.value)" class="bg-transparent border-none text-xs font-bold text-white focus:ring-0 cursor-pointer">
+                            <option value="after">在 1 结束后</option>
+                            <option value="with">与 1 一起开始</option>
+                        </select>
+                    </div>
+                    <button onclick="openSettings('高亮聚焦', '选择需要高亮聚焦的区域及聚光灯效果')" class="text-slate-500 hover:text-indigo-400 transition"><i class="fas fa-cog"></i></button>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex-1 bg-black/30 p-2 rounded text-[10px]">
+                        <span class="text-slate-500 block mb-1 uppercase tracking-tighter">延迟触发</span>
+                        <span class="text-indigo-400 font-mono">0.3s</span>
+                    </div>
+                    <div class="flex-1 bg-black/30 p-2 rounded text-[10px]">
+                        <span class="text-slate-500 block mb-1 uppercase tracking-tighter">执行动画</span>
+                        <span class="text-slate-300 font-mono">0.8s</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative bg-slate-900/60 border border-indigo-500/20 p-4 rounded-xl shadow-lg shadow-indigo-500/5">
+                <div class="connector-line line-with" id="line-3"></div>
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 h-6 bg-slate-700 rounded-md flex items-center justify-center text-white text-[10px] font-bold">3</span>
+                        <select onchange="updateLine(3, this.value)" class="bg-transparent border-none text-xs font-bold text-white focus:ring-0 cursor-pointer">
+                            <option value="with">与 2 一起开始</option>
+                            <option value="after">在 2 结束后</option>
+                        </select>
+                    </div>
+                    <button onclick="openSettings('放大视角', '设置放大倍数、平滑时长及目标锚点')" class="text-slate-500 hover:text-indigo-400 transition"><i class="fas fa-cog"></i></button>
+                </div>
+                <p class="text-[10px] text-slate-500 italic">该操作将同步执行镜头位移...</p>
+            </div>
+
+            <button class="w-full border-2 border-dashed border-slate-800 hover:border-indigo-500/30 py-4 rounded-xl flex flex-col items-center gap-1 group transition-all">
+                <i class="fas fa-plus-circle text-slate-700 group-hover:text-indigo-500 transition-colors"></i>
+                <span class="text-[10px] font-bold text-slate-600 group-hover:text-indigo-400 transition-colors">添加后续动作</span>
+            </button>
+        </div>
+
+        <div class="p-6 border-t border-white/5 bg-black/20">
+            <button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl font-bold text-xs tracking-widest transition shadow-lg shadow-indigo-500/20">
+                预览当前交互
+            </button>
+        </div>
+    </aside>
+
+    <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-[#1e293b] w-[400px] rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+            <div class="p-5 border-b border-white/5 flex justify-between items-center">
+                <div>
+                    <h3 id="modal-title" class="text-sm font-bold text-white">设置详情</h3>
+                    <p id="modal-desc" class="text-[10px] text-slate-400 mt-1"></p>
+                </div>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="space-y-2">
+                    <label class="text-[10px] text-slate-500 uppercase">目标对象/区域</label>
+                    <div class="bg-black/20 p-2 rounded border border-white/5 text-xs">Main_Area_01 <i class="fas fa-chevron-down float-right mt-1 text-slate-600"></i></div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] text-slate-500 uppercase">动效曲线 (Easing)</label>
+                    <div class="flex gap-2">
+                        <span class="px-2 py-1 bg-indigo-600 text-white text-[10px] rounded">平滑 (Ease-out)</span>
+                        <span class="px-2 py-1 bg-slate-800 text-slate-400 text-[10px] rounded">线性</span>
+                        <span class="px-2 py-1 bg-slate-800 text-slate-400 text-[10px] rounded">弹性</span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 bg-black/10 flex justify-end gap-3">
+                <button onclick="closeSettings()" class="text-[10px] text-slate-400 hover:text-white px-4">取消</button>
+                <button onclick="closeSettings()" class="bg-indigo-600 text-white text-[10px] px-6 py-2 rounded-lg font-bold shadow-lg shadow-indigo-600/20">确认保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateLine(id, value) {
+            const line = document.getElementById('line-' + id);
+            if (value === 'with') {
+                line.className = 'connector-line line-with';
+            } else {
+                line.className = 'connector-line line-after';
+            }
+        }
+
+        function openSettings(title, desc) {
+            document.getElementById('modal-title').innerText = title + ' 参数配置';
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

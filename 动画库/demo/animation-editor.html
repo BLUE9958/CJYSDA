@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSAP动画可视化编辑器</title>
+    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 400px;
+            gap: 20px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* 左侧面板 - 动画选择 */
+        .left-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-right: 1px solid #e9ecef;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .animation-type-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #6c757d;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .animation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .animation-item {
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .animation-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        .animation-item.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .animation-item .en-name {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-left: 8px;
+        }
+
+        /* 中间面板 - 预览和参数 */
+        .middle-panel {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 预览区域 */
+        .preview-section {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            min-height: 400px;
+        }
+
+        .preview-target {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .preview-text {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #495057;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 10px;
+        }
+
+        .grid-item {
+            width: 60px;
+            height: 60px;
+            background: #667eea;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* 控制按钮 */
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* 参数调整 */
+        .params-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .param-item {
+            margin-bottom: 15px;
+        }
+
+        .param-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 6px;
+        }
+
+        .param-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .param-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="range"] {
+            width: calc(100% - 80px);
+            margin-right: 10px;
+        }
+
+        .range-value {
+            display: inline-block;
+            width: 60px;
+            text-align: right;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        /* 右侧面板 - 代码输出 */
+        .right-panel {
+            background: #2d3748;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .code-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #e2e8f0;
+        }
+
+        .code-section {
+            margin-bottom: 20px;
+        }
+
+        .code-header {
+            font-size: 0.9rem;
+            color: #a0aec0;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .code-block {
+            background: #1a202c;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            margin-bottom: 10px;
+        }
+
+        .copy-btn {
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #2d3748;
+        }
+
+        /* 动画类型切换 */
+        .preview-type-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .preview-type-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .preview-type-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .editor-grid {
+                grid-template-columns: 250px 1fr 350px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .editor-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 GSAP动画可视化编辑器</h1>
+        
+        <div class="editor-grid">
+            <!-- 左侧面板 - 动画选择 -->
+            <div class="left-panel">
+                <h3 class="panel-title">动画效果</h3>
+                
+                <div class="animation-type-tabs">
+                    <button class="tab-btn active" data-type="element">元素动画</button>
+                    <button class="tab-btn" data-type="text">文本动画</button>
+                    <button class="tab-btn" data-type="group">组动画</button>
+                </div>
+
+                <div class="animation-list" id="animationList">
+                    <!-- 动画列表将通过JS动态生成 -->
+                </div>
+            </div>
+
+            <!-- 中间面板 - 预览和参数 -->
+            <div class="middle-panel">
+                <h3 class="panel-title">预览效果</h3>
+                
+                <!-- 预览类型选择 -->
+                <div class="preview-type-selector">
+                    <button class="preview-type-btn active" data-preview="single">单个元素</button>
+                    <button class="preview-type-btn" data-preview="text">文本</button>
+                    <button class="preview-type-btn" data-preview="grid">网格</button>
+                </div>
+
+                <!-- 预览区域 -->
+                <div class="preview-section">
+                    <div id="singlePreview" style="display: block;">
+                        <div class="preview-target" id="previewElement">
+                            预览元素
+                        </div>
+                    </div>
+                    
+                    <div id="textPreview" style="display: none;">
+                        <div class="preview-text" id="previewText">
+                            GSAP动画效果
+                        </div>
+                    </div>
+                    
+                    <div id="gridPreview" style="display: none;">
+                        <div class="preview-grid" id="previewGrid">
+                            <div class="grid-item">1</div>
+                            <div class="grid-item">2</div>
+                            <div class="grid-item">3</div>
+                            <div class="grid-item">4</div>
+                            <div class="grid-item">5</div>
+                            <div class="grid-item">6</div>
+                            <div class="grid-item">7</div>
+                            <div class="grid-item">8</div>
+                            <div class="grid-item">9</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 控制按钮 -->
+                <div class="control-buttons">
+                    <button class="btn btn-primary" id="playBtn">▶️ 播放动画</button>
+                    <button class="btn btn-secondary" id="resetBtn">🔄 重置</button>
+                </div>
+
+                <!-- 参数调整 -->
+                <div class="params-section">
+                    <h3 class="panel-title">参数调整</h3>
+                    <div id="paramsPanel">
+                        <!-- 参数面板将通过JS动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧面板 - 代码输出 -->
+            <div class="right-panel">
+                <h3 class="code-title">📋 生成代码</h3>
+                
+                <div class="code-section">
+                    <div class="code-header">导入语句</div>
+                    <div class="code-block" id="importCode">
+import { gsap } from 'gsap';
+                    </div>
+                </div>
+
+                <div class="code-section">
+                    <div class="code-header">HTML结构</div>
+                    <div class="code-block" id="htmlCode">
+<!-- 添加要动画的元素 -->
+<div class="animated-element">元素内容</div>
+                    </div>
+                </div>
+
+                <div class="code-section">
+                    <div class="code-header">JavaScript代码</div>
+                    <div class="code-block" id="jsCode">
+// 选择要动画的元素
+const element = document.querySelector('.animated-element');
+
+// 执行动画
+gsap.from(element, {
+    duration: 1,
+    opacity: 0,
+    ease: "power1.out"
+});
+                    </div>
+                    <button class="copy-btn" onclick="copyCode('jsCode')">📋 复制代码</button>
+                </div>
+
+                <div class="code-section">
+                    <div class="code-header">使用动画库的代码</div>
+                    <div class="code-block" id="libCode">
+// 使用动画库执行动画
+import { AnimationLib } from './animation-lib.js';
+
+const element = document.querySelector('.animated-element');
+const fadeInAnim = AnimationLib.elementEffects.find(anim => anim.id === 'fadeIn');
+fadeInAnim.run(element, {
+    duration: 1,
+    ease: "power1.out"
+});
+                    </div>
+                    <button class="copy-btn" onclick="copyCode('libCode')">📋 复制代码</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 动画库定义（复制自animation-lib.js）
+        const AnimationLib = {
+            elementEffects: [
+                { id: 'fadeIn', name: '淡入', enName: 'Fade In', defaultParams: { duration: 1, ease: "power1.out" }, run: (el, config = {}) => gsap.from(el, { duration: 1, ease: "power1.out", ...config, opacity: 0 }) },
+                { id: 'fadeOut', name: '淡出', enName: 'Fade Out', defaultParams: { duration: 1, ease: "power1.in" }, run: (el, config = {}) => gsap.to(el, { duration: 1, ease: "power1.in", ...config, opacity: 0 }) },
+                { id: 'slideLeft', name: '左滑', enName: 'Slide Left', defaultParams: { duration: 1, distance: 300, ease: "power2.out" }, run: (el, { duration = 1, distance = 300, ease = "power2.out" } = {}) => gsap.from(el, { duration, x: -distance, opacity: 0, ease }) },
+                { id: 'slideRight', name: '右滑', enName: 'Slide Right', defaultParams: { duration: 1, distance: 300, ease: "power2.out" }, run: (el, { duration = 1, distance = 300, ease = "power2.out" } = {}) => gsap.from(el, { duration, x: distance, opacity: 0, ease }) },
+                { id: 'slideTop', name: '上滑', enName: 'Slide Top', defaultParams: { duration: 1, distance: 300, ease: "power2.out" }, run: (el, { duration = 1, distance = 300, ease = "power2.out" } = {}) => gsap.from(el, { duration, y: -distance, opacity: 0, ease }) },
+                { id: 'slideBottom', name: '下滑', enName: 'Slide Bottom', defaultParams: { duration: 1, distance: 300, ease: "power2.out" }, run: (el, { duration = 1, distance = 300, ease = "power2.out" } = {}) => gsap.from(el, { duration, y: distance, opacity: 0, ease }) },
+                { id: 'scaleUp', name: '放大', enName: 'Scale Up', defaultParams: { duration: 1, scale: 0, ease: "back.out(1.7)" }, run: (el, { duration = 1, scale = 0, ease = "back.out(1.7)" } = {}) => gsap.from(el, { duration, scale, opacity: 0, ease }) },
+                { id: 'scaleDown', name: '缩小', enName: 'Scale Down', defaultParams: { duration: 1, scale: 2, ease: "power2.out" }, run: (el, { duration = 1, scale = 2, ease = "power2.out" } = {}) => gsap.from(el, { duration, scale, opacity: 0, ease }) },
+                { id: 'rotateIn', name: '旋入', enName: 'Rotate In', defaultParams: { duration: 1, rotation: -360, ease: "back.out(1.7)" }, run: (el, { duration = 1, rotation = -360, ease = "back.out(1.7)" } = {}) => gsap.from(el, { duration, rotation, opacity: 0, scale: 0, ease }) },
+                { id: 'rotateOut', name: '旋出', enName: 'Rotate Out', defaultParams: { duration: 1, rotation: 360, ease: "power2.in" }, run: (el, { duration = 1, rotation = 360, ease: "power2.in" } = {}) => gsap.to(el, { duration, rotation, opacity: 0, scale: 0, ease }) },
+                { id: 'bounceIn', name: '弹入', enName: 'Bounce In', defaultParams: { duration: 1 }, run: (el, config = {}) => gsap.from(el, { duration: 1, ease: "bounce.out", ...config, scale: 0 }) },
+                { id: 'elasticIn', name: '弹性进入', enName: 'Elastic In', defaultParams: { duration: 1.5, x: -300 }, run: (el, config = {}) => gsap.from(el, { duration: 1.5, x: -300, ease: "elastic.out(1, 0.3)", ...config }) },
+                { id: 'breathing', name: '呼吸', enName: 'Breathing', defaultParams: { duration: 1, scale: 1.1, opacity: 0.8 }, run: (el, { duration = 1, scale = 1.1, opacity = 0.8 } = {}) => { const tl = gsap.timeline({ repeat: -1, yoyo: true }); tl.to(el, { duration, scale, opacity, ease: "sine.inOut" }); return tl; } },
+                { id: 'neonPulse', name: '霓虹脉冲', enName: 'Neon Pulse', defaultParams: { duration: 0.5, color: "rgba(0, 243, 255, 1)" }, run: (el, { duration = 0.5, color = "rgba(0, 243, 255, 1)" } = {}) => { const tl = gsap.timeline({ repeat: -1, yoyo: true }); const finalColor = color; const glowColor = finalColor.replace('1)', '0.8)').replace('rgb', 'rgba'); const bgColor = finalColor.replace('1)', '0.4)').replace('rgb', 'rgba'); tl.to(el, { duration, boxShadow: `0 0 50px ${finalColor}, 0 0 20px ${glowColor}`, border: `5px solid ${finalColor}`, backgroundColor: bgColor }); return tl; } },
+                { id: 'blurIn', name: '模糊进入', enName: 'Blur In', defaultParams: { duration: 1, blur: 20 }, run: (el, { duration = 1, blur = 20 } = {}) => gsap.fromTo(el, { filter: `blur(${blur}px)`, opacity: 0 }, { duration, filter: "blur(0px)", opacity: 1 }) },
+                { id: 'glitch', name: '故障', enName: 'Glitch', defaultParams: { duration: 0.1 }, run: (el, { duration = 0.1 } = {}) => { const tl = gsap.timeline({ repeat: 2 }); tl.to(el, { x: -5, skewX: 5, duration, ease: "steps(1)" }).to(el, { x: 5, skewX: -5, duration, ease: "steps(1)" }).to(el, { x: 0, skewX: 0, duration }); return tl; } },
+                { id: 'flipX', name: '水平翻转', enName: 'Flip X', defaultParams: { duration: 1 }, run: (el, { duration = 1 } = {}) => { const tl = gsap.timeline({ repeat: 1, yoyo: true }); tl.to(el, { duration, rotationX: 360, ease: "back.out(1.7)" }); return tl; } },
+                { id: 'flipY', name: '垂直翻转', enName: 'Flip Y', defaultParams: { duration: 1 }, run: (el, { duration = 1 } = {}) => gsap.to(el, { duration, rotationY: 360, ease: "back.out(1.7)" }) },
+                { id: 'zoomInRotate', name: '缩放旋转', enName: 'Zoom Rotate', defaultParams: { duration: 1 }, run: (el, { duration = 1 } = {}) => gsap.from(el, { duration, scale: 0, rotation: 180, opacity: 0 }) },
+                { id: 'shake', name: '抖动', enName: 'Shake', defaultParams: { intensity: 10, speed: 0.1 }, run: (el, { intensity = 10, speed = 0.1 } = {}) => { const tl = gsap.timeline(); tl.to(el, { x: -intensity, duration: speed }).to(el, { x: intensity, duration: speed }).to(el, { x: -intensity, duration: speed }).to(el, { x: intensity, duration: speed }).to(el, { x: 0, duration: speed }); return tl; } },
+                { id: 'swing', name: '摆动', enName: 'Swing', defaultParams: { rotation: 15, duration: 0.2 }, run: (el, { rotation = 15, duration = 0.2 } = {}) => { const t1 = gsap.to(el, { duration, rotation, transformOrigin: "50% 0%" }); gsap.to(el, { duration: 2, rotation: 0, ease: "elastic.out(1.75, 0.1)", delay: duration }); return t1; } },
+                { id: 'wobble', name: '摇晃', enName: 'Wobble', defaultParams: { duration: 0.15, intensity: 1 }, run: (el, { duration = 0.15, intensity = 1 } = {}) => { const i = intensity; const tl = gsap.timeline(); tl.to(el, { rotation: -5 * i, x: -10 * i, duration }).to(el, { rotation: 3 * i, x: 10 * i, duration }).to(el, { rotation: -3 * i, x: -5 * i, duration }).to(el, { rotation: 2 * i, x: 5 * i, duration }).to(el, { rotation: 0, x: 0, duration }); return tl; } },
+                { id: 'jello', name: '果冻', enName: 'Jello', defaultParams: { duration: 0.2, intensity: 1 }, run: (el, { duration = 0.2, intensity = 1 } = {}) => { const i = intensity; const tl = gsap.timeline(); tl.to(el, { skewX: 12.5 * i, skewY: 12.5 * i, duration }).to(el, { skewX: -6.25 * i, skewY: -6.25 * i, duration }).to(el, { skewX: 3.125 * i, skewY: 3.125 * i, duration }).to(el, { skewX: 0, skewY: 0, duration }); return tl; } },
+                { id: 'colorCycle', name: '色彩循环', enName: 'Color Cycle', defaultParams: { duration: 1 }, run: (el, { duration = 1 } = {}) => { const tl = gsap.timeline({ repeat: -1, yoyo: true }); tl.to(el, { backgroundColor: "#ff0000", duration }).to(el, { backgroundColor: "#00ff00", duration }).to(el, { backgroundColor: "#0000ff", duration }); return tl; } },
+                { id: 'flash', name: '闪烁', enName: 'Flash', defaultParams: { duration: 0.2 }, run: (el, { duration = 0.2 } = {}) => { const tl = gsap.timeline(); tl.to(el, { opacity: 0, duration }).to(el, { opacity: 1, duration }).to(el, { opacity: 0, duration }).to(el, { opacity: 1, duration }); return tl; } },
+                { id: 'rubberBand', name: '橡皮筋', enName: 'Rubber Band', defaultParams: { duration: 0.1 }, run: (el, { duration = 0.1 } = {}) => { const tl = gsap.timeline(); tl.to(el, { scaleX: 1.25, scaleY: 0.75, duration: duration * 3 }).to(el, { scaleX: 0.75, scaleY: 1.25, duration }).to(el, { scaleX: 1.15, scaleY: 0.85, duration }).to(el, { scaleX: 0.95, scaleY: 1.05, duration }).to(el, { scaleX: 1, scaleY: 1, duration }); return tl; } },
+                { id: 'tada', name: '哒哒', enName: 'Tada', defaultParams: { duration: 0.1, scale: 1.1, rotation: 3 }, run: (el, { duration = 0.1, scale = 1.1, rotation = 3 } = {}) => { const tl = gsap.timeline(); tl.to(el, { scale: 0.9, rotation: -rotation, duration }).to(el, { scale, rotation, duration }).to(el, { scale, rotation: -rotation, duration }).to(el, { scale, rotation, duration }).to(el, { scale: 1, rotation: 0, duration }); return tl; } },
+                { id: 'heartbeat', name: '心跳', enName: 'Heartbeat', defaultParams: { duration: 0.15, scale: 1.3 }, run: (el, { duration = 0.15, scale = 1.3 } = {}) => { const tl = gsap.timeline({ repeat: -1 }); tl.to(el, { scale, duration, ease: "power1.out" }).to(el, { scale: 1, duration, ease: "power1.in" }).to(el, { scale, duration, ease: "power1.out", delay: 0.1 }).to(el, { scale: 1, duration: duration * 2, ease: "power1.in" }); return tl; } },
+                { id: 'float', name: '漂浮', enName: 'Float', defaultParams: { duration: 2, y: -20 }, run: (el, { duration = 2, y = -20 } = {}) => { const tl = gsap.timeline({ repeat: -1, yoyo: true }); tl.to(el, { y, duration, ease: "sine.inOut" }); return tl; } }
+            ],
+            textEffects: [
+                { id: 'textScramble', name: '乱码', enName: 'Scramble', config: { useSplitText: false }, defaultParams: { duration: 1.5 }, run: (el, config = {}) => { const duration = config.duration || 1.5; let endText = el.dataset.originalText; if (!endText) { endText = el.innerText || el.textContent || ""; el.dataset.originalText = endText; } gsap.set(el, { opacity: 1 }); const chars = "!<>-_\\/[]{}—=+*^?#________"; let obj = { val: 0 }; return gsap.to(obj, { val: 1, duration: duration, onUpdate: () => { const progress = obj.val; let str = ""; for(let i=0; i<endText.length; i++) { if (progress * endText.length > i) { str += endText[i]; } else { str += chars[Math.floor(Math.random() * chars.length)]; } } el.innerText = str; } }); } },
+                { id: 'charFadeIn', name: '字符淡入', enName: 'Char Fade', config: { useSplitText: true }, defaultParams: { duration: 1, stagger: 0.1, ease: "power2.out" }, run: (el, { duration, stagger, ease } = {}) => { let chars = el.querySelectorAll('.char'); if (chars.length === 0) { const text = el.innerText || el.textContent || ""; const newHtml = text.split('').map(char => { const content = char === ' ' ? '&nbsp;' : char; return `<span class="char" style="display:inline-block; min-width: 0.3em;">${content}</span>`; }).join(''); el.innerHTML = newHtml; chars = el.querySelectorAll('.char'); } else { gsap.killTweensOf(chars); gsap.set(chars, { clearProps: "all" }); gsap.set(chars, { display: "inline-block", minWidth: "0.3em" }); } return gsap.from(chars, { opacity: 0, duration: duration || 1, stagger: stagger || 0.1, ease: ease || "power2.out" }); } },
+                { id: 'charSlideUp', name: '字符上滑', enName: 'Char Slide Up', config: { useSplitText: true }, defaultParams: { duration: 0.8, stagger: 0.05, y: 50, ease: "back.out(2)" }, run: (el, { duration, stagger, y, ease } = {}) => { const chars = el.querySelectorAll('.char'); return gsap.from(chars, { y: y || 50, opacity: 0, duration: duration || 0.8, stagger: stagger || 0.05, ease: ease || "back.out(2)" }); } },
+                { id: 'spacingExpand', name: '间距展开', enName: 'Spacing Exp', config: { useSplitText: false }, defaultParams: { duration: 1.5, letterSpacing: "-10px", ease: "power3.out" }, run: (el, { duration, letterSpacing, ease } = {}) => gsap.from(el, { letterSpacing: letterSpacing || "-10px", opacity: 0, duration: duration || 1.5, ease: ease || "power3.out" }) },
+                { id: 'blurReveal', name: '模糊显现', enName: 'Blur Reveal', config: { useSplitText: false }, defaultParams: { duration: 1.5, blur: 20, ease: "power2.out" }, run: (el, { duration, blur, ease } = {}) => gsap.fromTo(el, { filter: `blur(${blur || 20}px)`, opacity: 0 }, { duration: duration || 1.5, filter: "blur(0px)", opacity: 1, ease: ease || "power2.out" }) },
+                { id: 'rainbowFlow', name: '彩虹', enName: 'Rainbow', config: { useSplitText: false }, defaultParams: { duration: 2 }, run: (el, { duration } = {}) => { gsap.set(el, { backgroundImage: "linear-gradient(90deg, #00f3ff, #bc13fe, #00f3ff)", backgroundSize: "200% auto", backgroundClip: "text", webkitBackgroundClip: "text", color: "transparent" }); return gsap.to(el, { backgroundPosition: "200% center", duration: duration || 2, ease: "linear", repeat: -1 }); } },
+                { id: 'glitchText', name: '故障文字', enName: 'Glitch Text', config: { useSplitText: false }, defaultParams: { speed: 0.05 }, run: (el, { speed } = {}) => { const s = speed || 0.05; const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 }); tl.to(el, { skewX: 70, ease: "power4.inOut", duration: s }).to(el, { skewX: 0, ease: "power4.inOut", duration: s }).to(el, { opacity: 0, duration: s }).to(el, { opacity: 1, duration: s }).to(el, { x: -20, duration: s }).to(el, { x: 0, duration: s }); return tl; } },
+                { id: 'typewriterCursors', name: '打字机+', enName: 'Typewriter+', config: { useSplitText: false, initialLabel: "" }, defaultParams: { duration: 3 }, run: (el, config = {}) => { const duration = config.duration || 3; let originalText = el.dataset.originalText; if (!originalText) { originalText = el.innerText || el.textContent || ""; el.dataset.originalText = originalText; } gsap.set(el, { opacity: 1, display: "inline-block", minWidth: "10px", width: "auto", height: "auto", borderRight: "2px solid var(--accent-cyan)", textShadow: "none" }); gsap.fromTo(el, { borderRightColor: "var(--accent-cyan)" }, { borderRightColor: "transparent", duration: 0.5, repeat: -1, yoyo: true, ease: "steps(1)" }); let cursorObj = { i: 0 }; return gsap.to(cursorObj, { i: originalText.length, duration: duration, ease: "steps(" + (originalText.length || 10) + ")", onUpdate: () => { const count = Math.ceil(cursorObj.i); el.innerText = originalText.substring(0, count); } }); } },
+                { id: 'elasticChars', name: '弹性字符', enName: 'Elastic Char', config: { useSplitText: true }, defaultParams: { duration: 1, stagger: 0.5, ease: "elastic.out(1, 0.3)" }, run: (el, { duration, stagger, ease } = {}) => { const chars = el.querySelectorAll('.char'); return gsap.from(chars, { scale: 0, duration: duration || 1, stagger: { amount: stagger || 0.5, from: "center" }, ease: ease || "elastic.out(1, 0.3)" }); } },
+                { id: 'waveText', name: '波浪', enName: 'Wave', config: { useSplitText: true }, defaultParams: { duration: 0.5, y: -20, stagger: 0.1 }, run: (el, { duration, y, stagger } = {}) => { let chars = el.querySelectorAll('.char'); if (chars.length === 0) { const text = el.innerText || el.textContent || ""; const newHtml = text.split('').map(char => { const content = char === ' ' ? '&nbsp;' : char; return `<span class="char" style="display:inline-block; min-width: 0.3em;">${content}</span>`; }).join(''); el.innerHTML = newHtml; chars = el.querySelectorAll('.char'); } else { gsap.killTweensOf(chars); gsap.set(chars, { clearProps: "all" }); gsap.set(chars, { display: "inline-block", minWidth: "0.3em" }); } const tl = gsap.timeline({ repeat: -1, yoyo: true }); tl.fromTo(chars, { y: 0 }, { y: y || -20, duration: duration || 0.5, stagger: { each: stagger || 0.1, yoyo: true, repeat: -1 }, ease: "sine.inOut" }); return tl; } },
+                { id: 'shadowPop', name: '阴影弹出', enName: 'Shadow Pop', config: { useSplitText: false }, defaultParams: { duration: 0.3, x: -4, y: -4, ease: "power1.out" }, run: (el, { duration, x, y, ease } = {}) => { return gsap.to(el, { textShadow: "1px 1px var(--accent-cyan), 2px 2px var(--accent-cyan), 3px 3px var(--accent-cyan), 4px 4px var(--accent-cyan)", x: x || -4, y: y || -4, duration: duration || 0.3, ease: ease || "power1.out", repeat: -1, yoyo: true, repeatDelay: 0.5 }); } },
+                { id: 'neonFlicker', name: '霓虹闪烁', enName: 'Neon Flicker', config: { useSplitText: false }, defaultParams: { duration: 1 }, run: (el, { duration } = {}) => { const dur = duration || 1; gsap.set(el, { color: "#fff", textShadow: "0 0 10px #fff, 0 0 20px #fff, 0 0 30px var(--accent-purple), 0 0 40px var(--accent-purple)" }); const tl = gsap.timeline({ repeat: -1 }); tl.to(el, { opacity: 0.5, duration: 0.05 }).to(el, { opacity: 1, duration: 0.05 }).to(el, { opacity: 0.3, duration: 0.05 }).to(el, { opacity: 1, duration: 0.05 }).to(el, { opacity: 1, duration: dur }); return tl; } },
+                { id: 'wordRotate', name: '3D旋转', enName: '3D Rotate', config: { useSplitText: false }, defaultParams: { duration: 0.5, delay: 1 }, run: (el, configOrCb, cb) => { let config = configOrCb || {}; let updateLabelCallback = cb; if (typeof configOrCb === 'function') { updateLabelCallback = configOrCb; config = {}; } const { duration, delay } = config; gsap.set(el.parentNode, { perspective: 800 }); const tl = gsap.timeline({ repeat: -1 }); const words = ["未来", "科技", "动画", "GSAP"]; words.forEach((word) => { tl.call(() => { if(updateLabelCallback) updateLabelCallback(word); }).fromTo(el, { rotationX: 90, opacity: 0 }, { rotationX: 0, opacity: 1, duration: duration || 0.5 }).to(el, { rotationX: -90, opacity: 0, duration: duration || 0.5, delay: delay || 1 }); }); return tl; } },
+                { id: 'decode', name: '解码', enName: 'Decode', config: { useSplitText: true }, defaultParams: { duration: 1, speed: 0.1 }, run: (el, { duration, speed } = {}) => { const chars = el.querySelectorAll('.char'); chars.forEach((char, i) => { const original = char.innerText; const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; gsap.to(char, { duration: (duration || 1) + (i * (speed || 0.1)), onUpdate: function() { if (this.progress() < 1) { char.innerText = alphabet[Math.floor(Math.random() * alphabet.length)]; } else { char.innerText = original; } } }); }); return null; } },
+                { id: 'gradientwipe', name: '渐变擦除', enName: 'Gradient Wipe', config: { useSplitText: false }, defaultParams: { duration: 1.5, ease: "power2.inOut" }, run: (el, { duration, ease } = {}) => { gsap.set(el, { backgroundImage: "linear-gradient(90deg, #fff 50%, transparent 50%)", backgroundSize: "200% 100%", backgroundClip: "text", webkitBackgroundClip: "text", color: "transparent", backgroundPosition: "100% 0" }); return gsap.to(el, { backgroundPosition: "0% 0", duration: duration || 1.5, ease: ease || "power2.inOut" }); } },
+                { id: 'scatterReveal', name: '随机分散', enName: 'Scatter Reveal', config: { useSplitText: true }, defaultParams: { duration: 1.2, stagger: 0.05, ease: "back.out(1.2)" }, run: (el, { duration, stagger, ease } = {}) => { let chars = el.querySelectorAll('.char'); if (chars.length === 0) { const text = el.innerText || el.textContent || ""; const newHtml = text.split('').map(char => { const content = char === ' ' ? '&nbsp;' : char; return `<span class="char" style="display:inline-block; min-width: 0.3em;">${content}</span>`; }).join(''); el.innerHTML = newHtml; chars = el.querySelectorAll('.char'); } else { gsap.killTweensOf(chars); gsap.set(chars, { clearProps: "all" }); gsap.set(chars, { display: "inline-block", minWidth: "0.3em" }); } return gsap.from(chars, { yPercent: "random(-200, 200)", rotation: "random(-20, 20)", opacity: 0, duration: duration || 1.2, stagger: stagger || 0.05, ease: ease || "back.out(1.2)" }); } }
+            ],
+            groupEffects: [
+                { id: 'gridStagger', name: '网格交错', enName: 'Grid Stagger', defaultParams: { duration: 0.5, staggerAmount: 1, ease: "back.out(1.7)" }, run: (container, configOrItems, extraItems) => { let config = configOrItems || {}; let items = extraItems; if (configOrItems instanceof NodeList || Array.isArray(configOrItems)) { items = configOrItems; config = {}; } const { duration, staggerAmount, ease } = config; const targets = items || container.children; return gsap.from(targets, { scale: 0, opacity: 0, duration: duration || 0.5, stagger: { grid: [3, 3], from: "start", amount: staggerAmount || 1 }, ease: ease || "back.out(1.7)" }); } },
+                { id: 'staggerSlide', name: '滑动交错', enName: 'Slide Stagger', defaultParams: { duration: 0.8, stagger: 0.1, xOffset: 100, ease: "power2.out" }, run: (container, configOrItems, extraItems) => { let config = configOrItems || {}; let items = extraItems; if (configOrItems instanceof NodeList || Array.isArray(configOrItems)) { items = configOrItems; config = {}; } const { duration, stagger, xOffset, ease } = config; const targets = items || container.children; const offset = xOffset || 100; return gsap.from(targets, { x: (i) => i % 3 === 0 ? -offset : offset, opacity: 0, duration: duration || 0.8, stagger: stagger || 0.1, ease: ease || "power2.out" }); } },
+                { id: 'waveRipple', name: '波纹涟漪', enName: 'Wave Ripple', defaultParams: { duration: 0.5, scale: 0.5, staggerAmount: 1, ease: "power1.inOut" }, run: (container, configOrItems, extraItems) => { let config = configOrItems || {}; let items = extraItems; if (configOrItems instanceof NodeList || Array.isArray(configOrItems)) { items = configOrItems; config = {}; } const { duration, scale, staggerAmount, ease } = config; const targets = items || container.children; const tl = gsap.timeline({ repeat: -1, yoyo: true }); tl.to(targets, { scale: scale || 0.5, duration: duration || 0.5, stagger: { grid: [3, 3], from: "center", amount: staggerAmount || 1 }, ease: ease || "power1.inOut" }); return tl; } },
+                { id: 'meetInMiddle', name: '汇聚', enName: 'Converge', defaultParams: { duration: 1, distance: 200, ease: "power4.out" }, run: (container, configOrItems, extraItems) => { let config = configOrItems || {}; let items = extraItems; if (configOrItems instanceof NodeList || Array.isArray(configOrItems)) { items = configOrItems; config = {}; } const { duration, distance, ease } = config; const targets = items || container.children; const dist = distance || 200; return gsap.from(targets, { x: (i) => (i % 3 - 1) * dist, y: (i) => (Math.floor(i / 3) - 1) * dist, opacity: 0, duration: duration || 1, ease: ease || "power4.out" }); } },
+                { id: 'explodeOut', name: '爆炸', enName: 'Explode', defaultParams: { duration: 1, distance: 50, rotation: 180, ease: "power2.inOut" }, run: (container, configOrItems, extraItems) => { let config = configOrItems || {}; let items = extraItems; if (configOrItems instanceof NodeList || Array.isArray(configOrItems)) { items = configOrItems; config = {}; } const { duration, distance, rotation, ease } = config; const targets = items || container.children; const dist = distance || 50; const tl = gsap.timeline(); tl.to(targets, { x: (i) => (i % 3 - 1) * dist, y: (i) => (Math.floor(i / 3) - 1) * dist, rotation: rotation || 180, duration: duration || 1, ease: ease || "power2.inOut" }).to(targets, { x: 0, y: 0, rotation: 0, duration: duration || 1, ease: "elastic.out(1, 0.5)" }); return tl; } },
+                { id: 'dominoCascade', name: '多米诺', enName: 'Domino', defaultParams: { duration: 0.5, stagger: 0.1, rotationX: -90, ease: "back.out(1.7)" }, run: (container, configOrItems, extraItems) => { let config = configOrItems || {}; let items = extraItems; if (configOrItems instanceof NodeList || Array.isArray(configOrItems)) { items = configOrItems; config = {}; } const { duration, stagger, rotationX, ease } = config; const targets = items || container.children; return gsap.from(targets, { rotationX: rotationX || -90, opacity: 0, duration: duration || 0.5, stagger: stagger || 0.1, ease: ease || "back.out(1.7)" }); } },
+                { id: 'spiralGrid', name: '螺旋', enName: 'Spiral', defaultParams: { duration: 0.5, stagger: 0.15, ease: "back.out(1.7)" }, run: (container, configOrItems, extraItems) => { let config = configOrItems || {}; let items = extraItems; if (configOrItems instanceof NodeList || Array.isArray(configOrItems)) { items = configOrItems; config = {}; } const { duration, stagger, ease } = config; const targets = items || container.children; const spiralOrder = [0, 1, 2, 5, 8, 7, 6, 3, 4]; const tl = gsap.timeline(); Array.from(targets).forEach((item, i) => { const orderIndex = spiralOrder.indexOf(i); tl.from(item, { scale: 0, opacity: 0, duration: duration || 0.5, delay: orderIndex * (stagger || 0.15), ease: ease || "back.out(1.7)" }, 0); }); return tl; } },
+                { id: 'chaosConverge', name: '混沌网格', enName: 'Chaos Grid', defaultParams: { duration: 1.5, range: 500, ease: "power3.out" }, run: (container, configOrItems, extraItems) => { let config = configOrItems || {}; let items = extraItems; if (configOrItems instanceof NodeList || Array.isArray(configOrItems)) { items = configOrItems; config = {}; } const { duration, range, ease } = config; const targets = items || container.children; const r = range || 500; return gsap.from(targets, { x: () => Math.random() * r - (r/2), y: () => Math.random() * r - (r/2), rotation: () => Math.random() * 360, opacity: 0, duration: duration || 1.5, ease: ease || "power3.out" }); } },
+                { id: 'checkerboard', name: '棋盘格', enName: 'Checkerboard', defaultParams: { duration: 0.5, scale: 0.8 }, run: (container, configOrItems, extraItems) => { let config = configOrItems || {}; let items = extraItems; if (configOrItems instanceof NodeList || Array.isArray(configOrItems)) { items = configOrItems; config = {}; } const { duration, scale } = config; const targets = items || container.children; const tl = gsap.timeline({ repeat: -1, yoyo: true }); tl.to(targets, { scale: (i) => i % 2 === 0 ? (scale || 0.8) : 1, backgroundColor: (i) => i % 2 === 0 ? "var(--accent-purple)" : "rgba(0, 243, 255, 0.1)", duration: duration || 0.5 }); return tl; } },
+                { id: 'elasticList', name: '弹性堆叠', enName: 'Elastic Stack', defaultParams: { duration: 1, y: 300, stagger: 0.1, ease: "elastic.out(1, 0.5)" }, run: (container, configOrItems, extraItems) => { let config = configOrItems || {}; let items = extraItems; if (configOrItems instanceof NodeList || Array.isArray(configOrItems)) { items = configOrItems; config = {}; } const { duration, y, stagger, ease } = config; const targets = items || container.children; return gsap.from(targets, { y: y || 300, opacity: 0, duration: duration || 1, stagger: stagger || 0.1, ease: ease || "elastic.out(1, 0.5)" }); } }
+            ]
+        };
+
+        // 全局变量
+        let currentAnimationType = 'element';
+        let currentPreviewType = 'single';
+        let currentAnimation = null;
+        let currentParams = {};
+        let currentTween = null;
+
+        // DOM元素
+        const animationList = document.getElementById('animationList');
+        const paramsPanel = document.getElementById('paramsPanel');
+        const playBtn = document.getElementById('playBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const jsCode = document.getElementById('jsCode');
+        const libCode = document.getElementById('libCode');
+        const htmlCode = document.getElementById('htmlCode');
+
+        // 初始化
+        function init() {
+            setupEventListeners();
+            loadAnimations('element');
+            updatePreviewType('single');
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 动画类型切换
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentAnimationType = btn.dataset.type;
+                    loadAnimations(currentAnimationType);
+                });
+            });
+
+            // 预览类型切换
+            document.querySelectorAll('.preview-type-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.preview-type-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentPreviewType = btn.dataset.preview;
+                    updatePreviewType(currentPreviewType);
+                });
+            });
+
+            // 播放按钮
+            playBtn.addEventListener('click', playAnimation);
+
+            // 重置按钮
+            resetBtn.addEventListener('click', resetAnimation);
+        }
+
+        // 加载动画列表
+        function loadAnimations(type) {
+            animationList.innerHTML = '';
+            const animations = AnimationLib[`${type}Effects`];
+            
+            animations.forEach(anim => {
+                const item = document.createElement('div');
+                item.className = 'animation-item';
+                item.innerHTML = `${anim.name} <span class="en-name">(${anim.enName})</span>`;
+                item.addEventListener('click', (event) => selectAnimation(anim, event));
+                animationList.appendChild(item);
+            });
+        }
+
+        // 选择动画
+        function selectAnimation(animation, event) {
+            // 移除之前的选中状态
+            document.querySelectorAll('.animation-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 添加当前选中状态
+            event.target.closest('.animation-item').classList.add('active');
+            
+            currentAnimation = animation;
+            currentParams = { ...animation.defaultParams };
+            
+            // 生成参数面板
+            generateParamsPanel();
+            
+            // 更新代码
+            updateGeneratedCode();
+        }
+
+        // 生成参数面板
+        function generateParamsPanel() {
+            if (!currentAnimation) return;
+            
+            paramsPanel.innerHTML = '';
+            const params = currentAnimation.defaultParams;
+            
+            Object.entries(params).forEach(([key, value]) => {
+                const paramItem = document.createElement('div');
+                paramItem.className = 'param-item';
+                
+                const label = document.createElement('label');
+                label.className = 'param-label';
+                label.textContent = `${key}: ${value}`;
+                
+                let input;
+                if (typeof value === 'number') {
+                    input = document.createElement('input');
+                    input.type = 'range';
+                    input.className = 'param-input';
+                    input.min = '0';
+                    input.max = typeof value === 'number' ? (value > 1 ? value * 3 : 5) : '5';
+                    input.step = typeof value === 'number' && value < 1 ? '0.1' : '1';
+                    input.value = value;
+                    input.addEventListener('input', (e) => {
+                        currentParams[key] = parseFloat(e.target.value);
+                        label.textContent = `${key}: ${e.target.value}`;
+                        updateGeneratedCode();
+                    });
+                } else if (typeof value === 'string') {
+                    input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'param-input';
+                    input.value = value;
+                    input.addEventListener('input', (e) => {
+                        currentParams[key] = e.target.value;
+                        updateGeneratedCode();
+                    });
+                }
+                
+                paramItem.appendChild(label);
+                paramItem.appendChild(input);
+                paramsPanel.appendChild(paramItem);
+            });
+        }
+
+        // 更新预览类型
+        function updatePreviewType(type) {
+            // 隐藏所有预览
+            document.getElementById('singlePreview').style.display = 'none';
+            document.getElementById('textPreview').style.display = 'none';
+            document.getElementById('gridPreview').style.display = 'none';
+            
+            // 显示选中的预览
+            document.getElementById(`${type}Preview`).style.display = 'block';
+            
+            // 更新HTML代码
+            updateHTMLCode();
+        }
+
+        // 播放动画
+        function playAnimation() {
+            if (!currentAnimation) return;
+            
+            // 重置之前的动画
+            resetAnimation();
+            
+            // 获取目标元素
+            let target;
+            if (currentPreviewType === 'single') {
+                target = document.getElementById('previewElement');
+            } else if (currentPreviewType === 'text') {
+                target = document.getElementById('previewText');
+            } else if (currentPreviewType === 'grid') {
+                target = document.getElementById('previewGrid');
+            }
+            
+            // 执行动画
+            currentTween = currentAnimation.run(target, currentParams);
+        }
+
+        // 重置动画
+        function resetAnimation() {
+            // 杀死所有动画
+            if (currentTween) {
+                if (typeof currentTween.kill === 'function') {
+                    currentTween.kill();
+                }
+            }
+            
+            // 重置元素状态
+            if (currentPreviewType === 'single') {
+                const element = document.getElementById('previewElement');
+                gsap.set(element, { clearProps: 'all' });
+            } else if (currentPreviewType === 'text') {
+                const text = document.getElementById('previewText');
+                gsap.set(text, { clearProps: 'all' });
+                // 重置文本内容
+                if (text.dataset.originalText) {
+                    text.innerText = text.dataset.originalText;
+                }
+            } else if (currentPreviewType === 'grid') {
+                const grid = document.getElementById('previewGrid');
+                gsap.set(grid.children, { clearProps: 'all' });
+            }
+        }
+
+        // 更新生成的代码
+        function updateGeneratedCode() {
+            if (!currentAnimation) return;
+            
+            // 生成纯GSAP代码
+            const gsapCode = generateGSAPCode();
+            jsCode.textContent = gsapCode;
+            
+            // 生成使用动画库的代码
+            const libraryCode = generateLibraryCode();
+            libCode.textContent = libraryCode;
+            
+            // 更新HTML代码
+            updateHTMLCode();
+        }
+
+        // 生成GSAP代码
+        function generateGSAPCode() {
+            if (!currentAnimation) return '';
+            
+            let code = '';
+            
+            // 获取目标元素选择器
+            const selector = getElementSelector();
+            
+            // 生成代码
+            if (currentAnimation.id === 'fadeIn') {
+                code = `// 选择要动画的元素
+const element = document.querySelector('${selector}');
+
+// 执行淡入动画
+gsap.from(element, {
+    duration: ${currentParams.duration},
+    ease: "${currentParams.ease}",
+    opacity: 0
+});`;
+            } else if (currentAnimation.id === 'fadeOut') {
+                code = `// 选择要动画的元素
+const element = document.querySelector('${selector}');
+
+// 执行淡出动画
+gsap.to(element, {
+    duration: ${currentParams.duration},
+    ease: "${currentParams.ease}",
+    opacity: 0
+});`;
+            } else if (currentAnimation.id.includes('slide')) {
+                const direction = currentAnimation.id.replace('slide', '');
+                const axis = direction === 'Left' || direction === 'Right' ? 'x' : 'y';
+                const value = direction === 'Left' || direction === 'Top' ? `-(${currentParams.distance})` : currentParams.distance;
+                
+                code = `// 选择要动画的元素
+const element = document.querySelector('${selector}');
+
+// 执行滑动动画
+gsap.from(element, {
+    duration: ${currentParams.duration},
+    ${axis}: ${value},
+    opacity: 0,
+    ease: "${currentParams.ease}"
+});`;
+            } else if (currentAnimation.id.includes('scale')) {
+                const scaleValue = currentAnimation.id === 'scaleUp' ? 0 : currentParams.scale;
+                code = `// 选择要动画的元素
+const element = document.querySelector('${selector}');
+
+// 执行缩放动画
+gsap.from(element, {
+    duration: ${currentParams.duration},
+    scale: ${scaleValue},
+    opacity: 0,
+    ease: "${currentParams.ease}"
+});`;
+            } else if (currentAnimation.id === 'rotateIn') {
+                code = `// 选择要动画的元素
+const element = document.querySelector('${selector}');
+
+// 执行旋入动画
+gsap.from(element, {
+    duration: ${currentParams.duration},
+    rotation: ${currentParams.rotation},
+    opacity: 0,
+    scale: 0,
+    ease: "${currentParams.ease}"
+});`;
+            } else if (currentAnimation.id === 'rotateOut') {
+                code = `// 选择要动画的元素
+const element = document.querySelector('${selector}');
+
+// 执行旋出动画
+gsap.to(element, {
+    duration: ${currentParams.duration},
+    rotation: ${currentParams.rotation},
+    opacity: 0,
+    scale: 0,
+    ease: "${currentParams.ease}"
+});`;
+            } else if (currentAnimation.id === 'breathing') {
+                code = `// 选择要动画的元素
+const element = document.querySelector('${selector}');
+
+// 执行呼吸动画
+const tl = gsap.timeline({ repeat: -1, yoyo: true });
+tl.to(element, {
+    duration: ${currentParams.duration},
+    scale: ${currentParams.scale},
+    opacity: ${currentParams.opacity},
+    ease: "sine.inOut"
+});`;
+            } else if (currentAnimationType === 'group') {
+                code = `// 选择容器元素
+const container = document.querySelector('${selector}');
+
+// 执行组动画
+gsap.from(container.children, {
+    duration: ${currentParams.duration},
+    scale: 0,
+    opacity: 0,
+    stagger: ${JSON.stringify(getStaggerConfig())},
+    ease: "${currentParams.ease}"
+});`;
+            } else {
+                // 通用代码模板
+                code = `// 选择要动画的元素
+const element = document.querySelector('${selector}');
+
+// 执行${currentAnimation.name}动画
+gsap.from(element, {
+    duration: ${currentParams.duration},
+    opacity: 0,
+    // 添加其他参数
+    ...${JSON.stringify(currentParams, null, 2)}
+});`;
+            }
+            
+            return code;
+        }
+
+        // 生成使用动画库的代码
+        function generateLibraryCode() {
+            if (!currentAnimation) return '';
+            
+            const selector = getElementSelector();
+            
+            return `// 使用动画库执行${currentAnimation.name}动画
+import { AnimationLib } from './animation-lib.js';
+
+// 选择要动画的元素
+const element = document.querySelector('${selector}');
+
+// 获取动画效果
+const animation = AnimationLib.${currentAnimationType}Effects.find(anim => anim.id === '${currentAnimation.id}');
+
+// 执行动画
+${currentAnimationType === 'group' ? '// 组动画需要容器元素' : ''}
+animation.run(${currentAnimationType === 'group' ? 'element, null, element.children' : 'element'}, {
+    ${Object.entries(currentParams).map(([key, value]) => `${key}: ${typeof value === 'string' ? `"${value}"` : value}`).join(',\n    ')}
+});`;
+        }
+
+        // 获取元素选择器
+        function getElementSelector() {
+            if (currentPreviewType === 'single') {
+                return '.animated-element';
+            } else if (currentPreviewType === 'text') {
+                return '.animated-text';
+            } else if (currentPreviewType === 'grid') {
+                return '.animated-grid';
+            }
+            return '.animated-element';
+        }
+
+        // 获取交错配置
+        function getStaggerConfig() {
+            if (currentAnimation.id === 'gridStagger') {
+                return { grid: [3, 3], from: "start", amount: currentParams.staggerAmount };
+            } else if (currentAnimation.id === 'waveRipple') {
+                return { grid: [3, 3], from: "center", amount: currentParams.staggerAmount };
+            } else {
+                return currentParams.stagger || 0.1;
+            }
+        }
+
+        // 更新HTML代码
+        function updateHTMLCode() {
+            let html = '';
+            
+            if (currentPreviewType === 'single') {
+                html = `<!-- 添加要动画的元素 -->
+<div class="animated-element">元素内容</div>`;
+            } else if (currentPreviewType === 'text') {
+                html = `<!-- 添加要动画的文本 -->
+<div class="animated-text">GSAP动画效果</div>`;
+            } else if (currentPreviewType === 'grid') {
+                html = `<!-- 添加要动画的网格 -->
+<div class="animated-grid">
+    <div>1</div>
+    <div>2</div>
+    <div>3</div>
+    <div>4</div>
+    <div>5</div>
+    <div>6</div>
+    <div>7</div>
+    <div>8</div>
+    <div>9</div>
+</div>`;
+            }
+            
+            htmlCode.textContent = html;
+        }
+
+        // 复制代码到剪贴板
+        function copyCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const textArea = document.createElement('textarea');
+            textArea.value = codeElement.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            // 显示复制成功提示
+            const btn = codeElement.nextElementSibling;
+            const originalText = btn.textContent;
+            btn.textContent = '✅ 已复制';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+
+        // 初始化应用
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

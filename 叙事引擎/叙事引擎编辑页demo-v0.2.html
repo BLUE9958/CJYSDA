@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>叙事引擎 - 墨刀导入专用版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body style="background-color: #020617; color: #e2e8f0; height: 100vh; margin: 0; overflow: hidden; display: flex; font-family: sans-serif;">
+
+    <main style="flex: 1; position: relative; background: radial-gradient(circle, #1e293b 1px, #020617 1px); background-size: 30px 30px; display: flex; align-items: center; justify-content: center; border-right: 1px solid rgba(255,255,255,0.05);">
+        
+        <div style="position: absolute; top: 24px; left: 32px; background: rgba(0,0,0,0.4); backdrop-filter: blur(12px); padding: 8px 16px; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; font-weight: bold;">当前路径:</span>
+            <span style="font-size: 12px; color: #818cf8;">首页</span>
+            <i class="fas fa-chevron-right" style="font-size: 8px; color: #334155;"></i>
+            <span style="font-size: 12px; color: #ffffff;">产品演示流程</span>
+        </div>
+
+        <div style="width: 85%; height: 80%; border-radius: 16px; background-color: #0f172a; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+            <h2 id="previewStatus" style="color: #1e293b; font-weight: 900; font-size: 60px; text-transform: uppercase; opacity: 0.2; user-select: none;">Scene Preview</h2>
+            
+            <div ondblclick="addNode('点击【目录】按钮', 'Main_CTA_Control')" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); cursor: pointer; text-align: center;">
+                <div style="width: 48px; height: 48px; background-color: rgba(99, 102, 241, 0.2); border-radius: 9999px; position: absolute; inset: 0; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
+                <div style="width: 48px; height: 48px; background-color: #4f46e5; border-radius: 9999px; border: 2px solid #ffffff; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); position: relative;">
+                    <i class="fas fa-plus" style="color: white;"></i>
+                </div>
+                <span style="position: absolute; top: 56px; left: 50%; transform: translateX(-50%); font-size: 10px; background-color: #4f46e5; color: white; padding: 2px 8px; border-radius: 4px; white-space: nowrap;">双击录制节点</span>
+            </div>
+        </div>
+
+        <div style="position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background: rgba(0,0,0,0.6); backdrop-filter: blur(20px); border-radius: 9999px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);">
+            <button style="color: #94a3b8;"><i class="fas fa-step-backward" style="font-size: 12px;"></i></button>
+            <button style="width: 40px; height: 40px; background-color: #4f46e5; border-radius: 9999px; color: white; display: flex; align-items: center; justify-content: center;"><i class="fas fa-play"></i></button>
+            <button style="color: #94a3b8;"><i class="fas fa-step-forward" style="font-size: 12px;"></i></button>
+            <div style="height: 16px; width: 1px; background-color: rgba(255,255,255,0.1);"></div>
+            <span style="font-family: monospace; font-size: 12px; color: #64748b;">00:00 / 录制中</span>
+        </div>
+    </main>
+
+    <aside style="width: 380px; background-color: #0b0f1a; display: flex; flex-direction: column;">
+        <div style="padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="font-weight: bold; font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; color: #818cf8;">叙事序列配置</h3>
+                <button style="color: #475569;"><i class="fas fa-cog"></i></button>
+            </div>
+            <div style="background-color: rgba(30, 27, 75, 0.3); padding: 16px; border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.2);">
+                <p style="font-size: 10px; color: #475569; margin: 0 0 4px 0;">当前录制状态</p>
+                <h4 id="activeDesc" style="font-size: 14px; font-weight: bold; color: #ffffff; margin: 0; text-transform: uppercase;">等待捕获操作...</h4>
+            </div>
+        </div>
+
+        <div id="nodeContainer" style="flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column-reverse; gap: 16px;">
+            
+            <div class="root-node" style="background-color: rgba(15, 23, 42, 0.8); border: 1px dashed rgba(99, 102, 241, 0.4); border-radius: 12px; padding: 12px; position: relative;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 80px; height: 45px; background-color: #020617; border-radius: 4px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
+                        <i class="fas fa-home" style="color: #312e81; font-size: 14px;"></i>
+                    </div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="font-family: monospace; font-size: 9px; color: #818cf8; font-weight: bold;">START</span>
+                        </div>
+                        <h5 style="font-size: 12px; font-weight: bold; color: #ffffff; margin: 2px 0 0 0;">起始场景: 首页</h5>
+                        <p style="font-size: 9px; color: #475569; margin: 2px 0 0 0;">PAGE_ID: INDEX_001</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.05);">
+            <button style="width: 100%; background-color: #4f46e5; color: white; padding: 12px 0; border-radius: 12px; font-weight: bold; font-size: 12px; border: none; cursor: pointer;">保存叙事包</button>
+        </div>
+    </aside>
+
+    <script>
+        function addNode(actionName, controlName) {
+            const container = document.getElementById('nodeContainer');
+            const nodeCount = container.children.length; // 减去Root后的序号
+            
+            document.getElementById('activeDesc').innerText = `已录制: ${actionName}`;
+
+            const card = document.createElement('div');
+            // 内联所有样式以适配墨刀
+            card.style.backgroundColor = "rgba(30, 41, 59, 0.5)";
+            card.style.border = "1px solid rgba(255,255,255,0.05)";
+            card.style.borderRadius = "12px";
+            card.style.padding = "12px";
+            card.style.cursor = "pointer";
+            card.style.position = "relative";
+            card.style.transition = "all 0.3s";
+            
+            card.onclick = function() {
+                // 清理其他激活态
+                const allCards = container.querySelectorAll('div');
+                allCards.forEach(c => {
+                    if(c.style.borderColor === "rgb(99, 102, 241)") {
+                        c.style.borderColor = "rgba(255,255,255,0.05)";
+                        c.style.backgroundColor = "rgba(30, 41, 59, 0.5)";
+                        const seq = c.querySelector('.event-seq');
+                        if(seq) seq.style.display = "none";
+                    }
+                });
+                // 设置当前激活
+                this.style.borderColor = "#6366f1";
+                this.style.borderWidth = "2px";
+                this.style.backgroundColor = "rgba(99, 102, 241, 0.1)";
+                const currentSeq = this.querySelector('.event-seq');
+                if(currentSeq) currentSeq.style.display = "block";
+            };
+            
+            card.innerHTML = `
+                <div style="display: flex; gap: 12px;">
+                    <div style="width: 80px; height: 45px; background-color: #020617; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 8px; color: #1e293b; font-weight: bold; text-transform: uppercase;">
+                        Final State
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <span style="font-family: monospace; font-size: 9px; color: #818cf8; font-weight: bold;">STEP 0${nodeCount}</span>
+                            <i class="fas fa-check-circle" style="color: #10b981; font-size: 10px;"></i>
+                        </div>
+                        <h5 style="font-size: 12px; font-weight: bold; color: #e2e8f0; margin: 2px 0 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${actionName}</h5>
+                        <p style="font-size: 9px; color: #64748b; margin: 2px 0 0 0; text-transform: uppercase;">ID: ${controlName}</p>
+                    </div>
+                </div>
+                <div class="event-seq" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="width: 4px; height: 4px; background-color: #6366f1; border-radius: 9999px;"></div>
+                        <span style="font-size: 10px; color: #94a3b8;">打开弹窗: 弹出视频XXXXX</span>
+                        <i class="fas fa-cog" style="margin-left: auto; font-size: 10px; color: #334155;"></i>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 4px; height: 4px; background-color: #6366f1; border-radius: 9999px;"></div>
+                        <span style="font-size: 10px; color: #94a3b8;">高亮聚焦: 区域A</span>
+                        <i class="fas fa-cog" style="margin-left: auto; font-size: 10px; color: #334155;"></i>
+                    </div>
+                </div>
+            `;
+            
+            // 插入到起始节点上方
+            container.appendChild(card);
+            card.click();
+        }
+
+        // 初始化墨刀预览状态
+        window.onload = () => {
+            console.log("叙事引擎原型已就绪，支持双击录制。");
+        };
+    </script>
+</body>
+</html>

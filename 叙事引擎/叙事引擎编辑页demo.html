@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>叙事引擎 - 逻辑闭环版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .canvas-area { background: radial-gradient(circle, #1e293b 1px, #020617 1px); background-size: 30px 30px; }
+        .thumbnail { width: 80px; height: 45px; object-fit: cover; border-radius: 4px; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); }
+        .node-active { border: 2px solid #6366f1; background: rgba(99, 102, 241, 0.1); }
+        /* 隐藏滚动条 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-[#020617] text-slate-200 h-screen overflow-hidden flex">
+
+    <main class="flex-1 relative canvas-area flex items-center justify-center border-r border-white/5">
+        <div class="absolute top-6 left-8 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-2">
+            <span class="text-xs text-slate-500 uppercase tracking-widest font-bold">路径:</span>
+            <span class="text-xs text-indigo-400">首页</span>
+            <i class="fas fa-chevron-right text-[8px] text-slate-700"></i>
+            <span class="text-xs text-white">产品详情页</span>
+        </div>
+
+        <div class="w-[85%] h-[80%] rounded-2xl bg-slate-900 shadow-2xl relative flex items-center justify-center overflow-hidden border border-white/5">
+            <h2 id="previewStatus" class="text-slate-700 font-black text-6xl uppercase opacity-20">Scene Preview</h2>
+            
+            <div ondblclick="addNode('点击主按钮', 'Main_CTA')" class="group absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
+                <div class="w-12 h-12 bg-indigo-500/20 rounded-full animate-ping absolute inset-0"></div>
+                <div class="w-12 h-12 bg-indigo-600 rounded-full border-2 border-white flex items-center justify-center shadow-lg group-hover:scale-110 transition">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <span class="absolute top-14 left-1/2 -translate-x-1/2 text-[10px] bg-indigo-600 px-2 py-0.5 rounded whitespace-nowrap">双击添加节点</span>
+            </div>
+        </div>
+
+        <div class="absolute bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 bg-black/60 backdrop-blur-xl rounded-full border border-white/10 flex items-center gap-6 shadow-2xl">
+            <button class="hover:text-indigo-400"><i class="fas fa-step-backward text-xs"></i></button>
+            <button class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center"><i class="fas fa-play"></i></button>
+            <button class="hover:text-indigo-400"><i class="fas fa-step-forward text-xs"></i></button>
+            <div class="h-4 w-px bg-white/10"></div>
+            <span class="font-mono text-xs text-slate-400">00:00 / 04:20</span>
+        </div>
+    </main>
+
+    <aside class="w-[380px] bg-[#0b0f1a] flex flex-col">
+        <div class="p-6 border-b border-white/5">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-bold text-sm tracking-widest uppercase text-indigo-400">叙事线配置</h3>
+                <button class="p-2 hover:bg-white/5 rounded"><i class="fas fa-cog text-slate-500"></i></button>
+            </div>
+            <div class="bg-indigo-950/30 p-4 rounded-xl border border-indigo-500/20">
+                <p class="text-[10px] text-slate-500 mb-1">当前节点状态</p>
+                <h4 id="activeDesc" class="text-sm font-bold text-white uppercase">等待操作...</h4>
+            </div>
+        </div>
+
+        <div id="nodeContainer" class="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+            <p class="text-[10px] text-slate-600 text-center py-10 italic">暂无交互，请双击场景中控点</p>
+        </div>
+
+        <div class="p-4 border-t border-white/5">
+            <button class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold text-xs transition">保存叙事逻辑</button>
+        </div>
+    </aside>
+
+    <script>
+        function addNode(actionName, controlName) {
+            const container = document.getElementById('nodeContainer');
+            if (container.querySelector('p')) container.innerHTML = ''; // 清除占位文字
+
+            const nodeId = Date.now();
+            const nodeCount = container.children.length + 1;
+            
+            // 更新顶部描述
+            document.getElementById('activeDesc').innerText = `已添加：${actionName}`;
+
+            const card = document.createElement('div');
+            card.className = "node-card bg-slate-900/50 border border-white/5 rounded-xl p-3 cursor-pointer hover:border-indigo-500/30 transition-all animate-in slide-in-from-right-4 duration-300";
+            card.onclick = () => selectNode(card);
+            
+            card.innerHTML = `
+                <div class="flex gap-3">
+                    <div class="thumbnail flex items-center justify-center text-[8px] text-slate-700 bg-black uppercase font-bold">
+                        Final State ${nodeCount}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[9px] font-mono text-indigo-500 font-bold">节点 ${nodeCount}</span>
+                            <i class="fas fa-check-circle text-green-500 text-[10px]"></i>
+                        </div>
+                        <h5 class="text-xs font-bold text-slate-200 truncate">${actionName}</h5>
+                        <p class="text-[9px] text-slate-500 mt-1 uppercase">${controlName}</p>
+                    </div>
+                </div>
+                <div class="event-sequence hidden mt-3 pt-3 border-t border-white/5 space-y-2">
+                    <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                        <span class="w-1 h-1 rounded-full bg-indigo-500"></span>
+                        <span>事件 1: 显示弹窗动画</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                        <span class="w-1 h-1 rounded-full bg-indigo-500"></span>
+                        <span>事件 2: 镜头平滑移动</span>
+                    </div>
+                    <button class="text-[9px] text-indigo-400 mt-2 font-bold hover:underline">高级配置参数...</button>
+                </div>
+            `;
+            
+            container.prepend(card);
+            selectNode(card);
+        }
+
+        function selectNode(el) {
+            // 清除之前的激活态
+            document.querySelectorAll('.node-card').forEach(c => {
+                c.classList.remove('node-active');
+                c.querySelector('.event-sequence').classList.add('hidden');
+            });
+            // 激活当前
+            el.classList.add('node-active');
+            el.querySelector('.event-sequence').classList.remove('hidden');
+            
+            // 模拟画布联动
+            document.getElementById('previewStatus').innerText = "Final State Mode";
+            document.getElementById('previewStatus').classList.replace('text-slate-700', 'text-indigo-950');
+        }
+    </script>
+</body>
+</html>

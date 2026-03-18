@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>场景演示大师 - Pad原型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 强制原型尺寸 */
+        body {
+            background-color: #1a1a1b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #prototype-container {
+            width: 1180px;
+            height: 820px;
+            background-color: #09090b;
+            position: relative;
+            overflow: hidden;
+            border: 8px solid #27272a;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .transition-all-300 { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .node-active { background: #2563eb; transform: scale(1.02); z-index: 10; box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3); }
+        .collapsed-panel { width: 0 !important; overflow: hidden; border-left: none !important; }
+        .btn-press:active { transform: scale(0.96); }
+        .scroll-hide::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="prototype-container" class="flex">
+    
+    <div id="preview-area" class="relative flex-1 bg-black flex items-center justify-center transition-all-300 border-r border-zinc-800">
+        <div class="flex flex-col items-center">
+            <div class="w-32 h-32 border-4 border-dashed border-zinc-800 rounded-full flex items-center justify-center mb-4">
+                <span class="text-zinc-800 text-6xl">▶</span>
+            </div>
+            <div class="text-zinc-800 text-xl font-bold tracking-widest uppercase">实时演示画面监视</div>
+        </div>
+        
+        <div class="absolute top-8 left-8">
+            <div onclick="confirmDisconnect()" class="flex items-center bg-zinc-900/90 px-5 py-2.5 rounded-2xl border border-zinc-700 backdrop-blur-md cursor-pointer hover:bg-red-950/40">
+                <div class="w-3 h-3 bg-green-500 rounded-full mr-3 shadow-[0_0_10px_#22c55e]"></div>
+                <span class="text-sm font-bold text-zinc-300">已连接：展厅主大屏</span>
+            </div>
+        </div>
+
+        <button id="toggle-sidebar" onclick="toggleSidebar()" class="absolute -right-5 top-1/2 -translate-y-1/2 w-10 h-12 bg-zinc-800 border border-zinc-700 rounded-lg flex items-center justify-center z-50 shadow-xl">
+            <span id="toggle-icon" class="text-zinc-400 font-bold">❯</span>
+        </button>
+    </div>
+
+    <div id="sidebar" class="w-[300px] flex flex-col bg-[#0c0c0e] transition-all-300 border-l border-zinc-800">
+        
+        <div class="flex-1 overflow-y-auto p-6 space-y-5 scroll-hide">
+            <h3 class="text-[10px] font-black text-zinc-500 tracking-[0.2em] mb-4 uppercase">演示叙事线</h3>
+            
+            <div class="p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl flex items-center space-x-3 opacity-30">
+                <div class="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] border border-zinc-700">始</div>
+                <div class="text-sm">演示开始（待命）</div>
+            </div>
+
+            <div class="node-active p-5 rounded-2xl flex items-start space-x-3">
+                <div class="w-7 h-7 rounded-full bg-white text-blue-600 flex-shrink-0 flex items-center justify-center text-sm font-black">2</div>
+                <div class="flex-1">
+                    <div class="text-base font-bold text-white">智慧展厅核心交互</div>
+                    <div class="text-xs text-blue-50 mt-2 leading-relaxed opacity-90">
+                        展示全景漫游功能，点击场景中的热点可触发三维模型弹出展示。
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl flex items-center space-x-3">
+                <div class="w-7 h-7 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-xs text-zinc-500 border border-zinc-700 font-bold">3</div>
+                <div class="text-sm font-bold text-zinc-400">全球业务数据看板</div>
+            </div>
+        </div>
+
+        <div class="p-6 bg-zinc-900/40 border-t border-zinc-800">
+            <div class="flex justify-center mb-6">
+                <button class="flex items-center space-x-2 px-6 py-2 bg-zinc-800 rounded-full border border-zinc-700 text-zinc-400 hover:text-white btn-press transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="text-xs font-bold">重播当前节点</span>
+                </button>
+            </div>
+            <div class="flex gap-4">
+                <button class="flex-1 h-20 bg-zinc-800 rounded-[20px] flex flex-col items-center justify-center btn-press hover:bg-zinc-700 border border-zinc-700">
+                    <span class="text-lg font-bold">上一步</span>
+                </button>
+                <button class="flex-1 h-20 bg-blue-600 rounded-[20px] flex flex-col items-center justify-center btn-press hover:bg-blue-500 shadow-lg shadow-blue-900/40">
+                    <span class="text-lg font-bold text-white">下一步</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 grid grid-cols-3 gap-2 bg-[#050506] border-t border-zinc-800">
+            <button onclick="toggleDrawer('scene')" class="flex flex-col items-center py-4 rounded-2xl hover:bg-zinc-800 btn-press">
+                <span class="text-xl mb-1">🗺️</span>
+                <span class="text-[10px] text-zinc-500 font-black">场景导航</span>
+            </button>
+            <button onclick="toggleScreen()" class="flex flex-col items-center py-4 rounded-2xl hover:bg-zinc-800 btn-press">
+                <span id="screen-icon" class="text-xl mb-1">📺</span>
+                <span id="screen-text" class="text-[10px] text-zinc-500 font-black text-center">大屏全屏</span>
+            </button>
+            <button onclick="toggleDrawer('story')" class="flex flex-col items-center py-4 rounded-2xl hover:bg-zinc-800 btn-press">
+                <span class="text-xl mb-1">⇅</span>
+                <span class="text-[10px] text-zinc-500 font-black">切换叙事</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="common-drawer" class="absolute inset-0 z-[100] translate-y-full transition-transform duration-500 ease-in-out flex items-end">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="toggleDrawer()"></div>
+        <div class="relative w-full bg-[#121214] rounded-t-[40px] border-t border-zinc-700 h-[70%] flex flex-col shadow-2xl">
+            <div class="p-10 pb-4 flex justify-between items-center">
+                <h2 id="drawer-title" class="text-3xl font-black italic tracking-tighter uppercase text-zinc-600">标题</h2>
+                <button onclick="toggleDrawer()" class="w-12 h-12 bg-zinc-800 rounded-full flex items-center justify-center text-zinc-400 text-xl font-bold">✕</button>
+            </div>
+            
+            <div id="scene-tabs" class="px-10 flex space-x-8 border-b border-zinc-800 hidden">
+                <button class="pb-4 text-sm font-bold text-blue-500 border-bottom-2 border-blue-500">全部页面</button>
+                <button class="pb-4 text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-colors">首页模块</button>
+                <button class="pb-4 text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-colors">产品详情</button>
+                <button class="pb-4 text-sm font-bold text-zinc-500 hover:text-zinc-300 transition-colors">技术架构</button>
+            </div>
+
+            <div id="drawer-content" class="flex-1 p-10 overflow-y-auto scroll-hide"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const icon = document.getElementById('toggle-icon');
+        const isCollapsed = sidebar.classList.toggle('collapsed-panel');
+        icon.innerText = isCollapsed ? '❮' : '❯';
+    }
+
+    let isFull = false;
+    function toggleScreen() {
+        isFull = !isFull;
+        document.getElementById('screen-icon').innerText = isFull ? '🔳' : '📺';
+        document.getElementById('screen-text').innerText = isFull ? '退出全屏' : '大屏全屏';
+        document.getElementById('screen-text').style.color = isFull ? '#3b82f6' : '#71717a';
+    }
+
+    function toggleDrawer(type) {
+        const drawer = document.getElementById('common-drawer');
+        const title = document.getElementById('drawer-title');
+        const tabs = document.getElementById('scene-tabs');
+        const content = document.getElementById('drawer-content');
+
+        if(drawer.classList.contains('translate-y-full')) {
+            if(type === 'scene') {
+                title.innerText = "场景导航抽屉";
+                tabs.classList.remove('hidden');
+                content.innerHTML = `<div class="grid grid-cols-3 gap-8">
+                    ${Array(6).fill(0).map((_, i) => `
+                        <div class="group cursor-pointer">
+                            <div class="aspect-video bg-zinc-800 rounded-[24px] border border-zinc-700 overflow-hidden mb-4 group-hover:border-blue-500 transition-all">
+                                <div class="w-full h-full flex items-center justify-center bg-zinc-900 text-zinc-800 font-bold uppercase tracking-tighter">Thumbnail ${i+1}</div>
+                            </div>
+                            <div class="text-center font-bold text-zinc-400 group-hover:text-blue-400 transition-colors">场景页面标题 ${i+1}</div>
+                        </div>
+                    `).join('')}
+                </div>`;
+            } else {
+                title.innerText = "叙事线切换";
+                tabs.classList.add('hidden');
+                content.innerHTML = `<div class="grid grid-cols-2 gap-8">
+                    <div class="p-8 bg-blue-600 rounded-[32px] border-4 border-blue-400">
+                        <div class="text-[10px] text-blue-200 font-black uppercase mb-2 tracking-widest">Active 正在使用</div>
+                        <div class="text-2xl font-black text-white mb-2">标准商务演示流程</div>
+                        <div class="text-sm text-blue-100 opacity-80">包含：公司简介、核心方案、成功案例</div>
+                    </div>
+                    <div class="p-8 bg-zinc-800 rounded-[32px] border border-zinc-700 hover:bg-zinc-700 transition-all cursor-pointer">
+                        <div class="text-[10px] text-zinc-500 font-black uppercase mb-2 tracking-widest">Optional 可选</div>
+                        <div class="text-2xl font-black text-zinc-300 mb-2">技术专家深度讲解版</div>
+                        <div class="text-sm text-zinc-500">包含：底层架构、接口协议、安全体系</div>
+                    </div>
+                </div>`;
+            }
+            drawer.classList.remove('translate-y-full');
+        } else {
+            drawer.classList.add('translate-y-full');
+        }
+    }
+
+    function confirmDisconnect() {
+        if(confirm("确定要切断与大屏的远程控制吗？")) {
+            alert("控制台已离线");
+            location.reload();
+        }
+    }
+</script>
+
+</body>
+</html>

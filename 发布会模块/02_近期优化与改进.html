@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>场景演示大师1.0 - 近期优化与改进</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* 苹果发布会暗黑主题配色 */
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --text-light: #a1a1a6;
+            --accent-color: #8b5cf6;
+            --accent-light: #a78bfa;
+            --border-color: #2c2c2e;
+            --section-padding: 60px 20px;
+            --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            overflow-x: hidden;
+        }
+
+        /* Section Styles */
+        section {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: var(--section-padding);
+            background-color: var(--bg-color);
+        }
+
+        .section-inner {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Title Styles */
+        h2 {
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            text-align: center;
+            letter-spacing: -0.01em;
+        }
+
+        h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 20px 0 10px;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        /* Content Styles */
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .intro-text {
+            font-size: 1.3rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 60px;
+            color: var(--text-light);
+        }
+
+        /* Divider */
+        .divider {
+            width: 60px;
+            height: 4px;
+            background: var(--accent-color);
+            margin: 40px auto;
+            border-radius: 2px;
+        }
+
+        /* Optimization Grid */
+        .optimization-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .optimization-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .optimization-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .optimization-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-color);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
+        }
+
+        .optimization-item:hover::before {
+            transform: scaleX(1);
+        }
+
+        .optimization-item p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-color);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: var(--text-color);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-header {
+            margin-bottom: 30px;
+        }
+
+        .modal-header h3 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        .modal-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .modal-text {
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        .modal-text p {
+            text-align: left;
+        }
+
+        .modal-image {
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 12px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .modal-image .placeholder {
+            font-size: 3rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 2rem;
+            }
+
+            .intro-text {
+                font-size: 1.1rem;
+            }
+
+            .optimization-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 20px;
+            }
+
+            section {
+                padding: 40px 20px;
+            }
+
+            .modal-body {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Recent Optimizations -->
+        <section id="optimizations">
+            <div class="section-inner">
+                <h2>近期优化与改进</h2>
+                <div class="divider"></div>
+                <p class="intro-text">持续优化产品体验，提升性能和易用性</p>
+                
+                <div class="optimization-grid">
+                    <div class="optimization-item" data-modal="pdf-modal">
+                        <h5>PDF文档支持</h5>
+                        <p>新增PDF文档导入和展示功能</p>
+                    </div>
+                    <div class="optimization-item" data-modal="animation-modal">
+                        <h5>基础动画</h5>
+                        <p>新增淡入淡出、切换等动画效果</p>
+                    </div>
+                    <div class="optimization-item" data-modal="logs-modal">
+                        <h5>更新日志推送</h5>
+                        <p>自动推送新功能和更新内容</p>
+                    </div>
+                    <div class="optimization-item" data-modal="loading-modal">
+                        <h5>资源加载优化</h5>
+                        <p>优化大内存项目的加载机制</p>
+                    </div>
+                    <div class="optimization-item" data-modal="speed-modal">
+                        <h5>编辑速度提升</h5>
+                        <p>优化编辑操作的响应速度</p>
+                    </div>
+                    <div class="optimization-item" data-modal="feedback-modal">
+                        <h5>统一操作反馈</h5>
+                        <p>统一组件的操作反馈效果</p>
+                    </div>
+                    <div class="optimization-item" data-modal="space-modal">
+                        <h5>个人空间升级</h5>
+                        <p>个人项目升级为个人空间</p>
+                    </div>
+                    <div class="optimization-item" data-modal="templates-modal">
+                        <h5>行业模板新增</h5>
+                        <p>新增多套行业场景模板</p>
+                    </div>
+                </div>
+
+                <!-- Modals -->
+                <div id="pdf-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>PDF文档支持</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>新增对PDF文档的导入和展示支持，满足客户对文档类内容的展示需求，扩大产品适用场景。</p>
+                                <p><strong>客户价值：</strong>无需额外工具即可在场景中展示PDF内容，提升场景的完整性和专业性。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">📄</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="animation-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>基础动画效果</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>新增淡入淡出、切换等基础动画效果，丰富场景的交互体验，增强视觉吸引力。</p>
+                                <p><strong>客户价值：</strong>提升场景的生动性和吸引力，更好地传达信息，增强观众参与感。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">✨</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="logs-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>更新日志推送</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>上线更新日志推送功能，所有新功能和更新内容都会自动推送给用户，确保用户第一时间了解产品动态。</p>
+                                <p><strong>客户价值：</strong>及时了解产品进展，增强产品透明度，提升客户粘性。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">📰</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="loading-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>资源加载优化</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>针对大内存项目进行了加载机制优化，提高了兼容性，支持更复杂的大型项目。</p>
+                                <p><strong>客户价值：</strong>能够处理更大规模的项目，提升产品的可靠性和适用性。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">🚀</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="speed-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>编辑速度提升</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>优化了编辑操作的响应速度，操作更流畅，提升创作效率，减少等待时间。</p>
+                                <p><strong>客户价值：</strong>提高创作效率，减少等待时间，优化工作体验。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">⚡</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="feedback-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>统一操作反馈</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>统一多项组件的操作反馈，提升使用流畅度，降低学习成本。</p>
+                                <p><strong>客户价值：</strong>提供一致的操作体验，减少使用中的困惑，提升操作效率。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">🎯</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="space-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>个人空间升级</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>重构项目管理首页，信息结构更清晰，访问更便捷。</p>
+                                <p><strong>客户价值：</strong>提升项目管理效率，降低使用复杂度，更容易上手。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">🏠</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="templates-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>行业模板新增</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>新增多套行业场景模板（含运营商、金融等），支持一键启用。</p>
+                                <p><strong>客户价值：</strong>降低创作门槛，快速搭建场景，缩短项目交付周期。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">🎨</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Modal functionality
+        const optimizationItems = document.querySelectorAll('.optimization-item');
+        const modals = document.querySelectorAll('.modal');
+        const closeBtns = document.querySelectorAll('.close-btn');
+
+        // Open modal when optimization item is clicked
+        optimizationItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const modalId = item.getAttribute('data-modal');
+                const modal = document.getElementById(modalId);
+                modal.classList.add('active');
+            });
+        });
+
+        // Close modal when close button is clicked
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modal = btn.closest('.modal');
+                modal.classList.remove('active');
+            });
+        });
+
+        // Close modal when clicking outside
+        modals.forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // Close modal when ESC key is pressed
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modals.forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

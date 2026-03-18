@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSAP动画可视化</title>
+    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+    <style>
+        /* 简化的CSS样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 250px 1fr 350px;
+            gap: 20px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            flex: 1;
+            min-height: 0;
+        }
+
+        .left-panel, .middle-panel, .right-panel {
+            padding: 20px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .category-section {
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .animation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .animation-item {
+            padding: 10px 15px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .animation-item:hover, .animation-item.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .preview-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            min-height: 300px;
+        }
+
+        .preview-target {
+            padding: 20px 40px;
+            background: transparent;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #495057;
+            font-size: 1.2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .preview-target.text-mode {
+            background: white;
+            border-color: #667eea;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .params-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .param-item {
+            margin-bottom: 15px;
+        }
+
+        .param-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .param-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+        }
+
+        .right-panel {
+            background: #2d3748;
+            color: white;
+        }
+
+        .code-block {
+            background: #1a202c;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Monaco', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            overflow-x: auto;
+            margin-bottom: 15px;
+        }
+
+        .copy-btn {
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .editor-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 GSAP动画可视化编辑器</h1>
+        
+        <div class="editor-grid">
+            <!-- 左侧面板 - 动画选择 -->
+            <div class="left-panel">
+                <h3 class="panel-title">动画效果</h3>
+                <div class="animation-list" id="animationList">
+                    <!-- 动画列表将通过JS动态生成 -->
+                </div>
+            </div>
+
+            <!-- 中间面板 - 预览和参数 -->
+            <div class="middle-panel">
+                <h3 class="panel-title">预览效果</h3>
+                
+                <!-- 预览区域 -->
+                <div class="preview-section">
+                    <div class="preview-target" id="previewElement">预览文本</div>
+                </div>
+
+                <!-- 控制按钮 -->
+                <div class="control-buttons">
+                    <button class="btn btn-primary" id="playBtn">▶️ 播放动画</button>
+                    <button class="btn btn-secondary" id="resetBtn">🔄 重置</button>
+                </div>
+
+                <!-- 参数调整 -->
+                <div class="params-section">
+                    <h3 class="panel-title">参数调整</h3>
+                    <div id="paramsPanel">
+                        <!-- 参数面板将通过JS动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧面板 - 代码输出 -->
+            <div class="right-panel">
+                <h3 class="panel-title">📋 生成代码</h3>
+                
+                <div class="code-section">
+                    <div class="code-block" id="jsCode">
+// 选择要动画的元素
+const element = document.querySelector('.animated-element');
+
+// 执行动画
+gsap.from(element, {
+    duration: 1,
+    opacity: 0,
+    ease: "power1.out"
+});
+                    </div>
+                    <button class="copy-btn" onclick="copyCode('jsCode')">📋 复制代码</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 完整的动画库定义 - 从animation-lib.js导入的所有动画
+        const AnimationLib = {
+            // 元素动画
+            elementEffects: [
+                { 
+                    id: 'fadeOut', name: '淡出', enName: 'Fade Out', 
+                    defaultParams: { duration: 1, ease: "power1.in" },
+                    run: function(el, config) {
+                        config = config || {};
+                        return gsap.to(el, { duration: 1, ease: "power1.in", ...config, opacity: 0 });
+                    }
+                },
+                { 
+                    id: 'slideLeft', name: '左滑', enName: 'Slide Left', 
+                    defaultParams: { duration: 1, distance: 300, ease: "power2.out" },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const distance = config.distance || 300;
+                        const ease = config.ease || "power2.out";
+                        return gsap.from(el, { duration: duration, x: -distance, opacity: 0, ease: ease });
+                    }
+                },
+                { 
+                    id: 'slideRight', name: '右滑', enName: 'Slide Right', 
+                    defaultParams: { duration: 1, distance: 300, ease: "power2.out" },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const distance = config.distance || 300;
+                        const ease = config.ease || "power2.out";
+                        return gsap.from(el, { duration: duration, x: distance, opacity: 0, ease: ease });
+                    }
+                },
+                { 
+                    id: 'slideTop', name: '上滑', enName: 'Slide Top', 
+                    defaultParams: { duration: 1, distance: 300, ease: "power2.out" },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const distance = config.distance || 300;
+                        const ease = config.ease || "power2.out";
+                        return gsap.from(el, { duration: duration, y: -distance, opacity: 0, ease: ease });
+                    }
+                },
+                { 
+                    id: 'slideBottom', name: '下滑', enName: 'Slide Bottom', 
+                    defaultParams: { duration: 1, distance: 300, ease: "power2.out" },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const distance = config.distance || 300;
+                        const ease = config.ease || "power2.out";
+                        return gsap.from(el, { duration: duration, y: distance, opacity: 0, ease: ease });
+                    }
+                },
+                { 
+                    id: 'scaleUp', name: '放大', enName: 'Scale Up', 
+                    defaultParams: { duration: 1, scale: 0, ease: "back.out(1.7)" },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const scale = config.scale || 0;
+                        const ease = config.ease || "back.out(1.7)";
+                        return gsap.from(el, { duration: duration, scale: scale, opacity: 0, ease: ease });
+                    }
+                },
+                { 
+                    id: 'scaleDown', name: '缩小', enName: 'Scale Down', 
+                    defaultParams: { duration: 1, scale: 2, ease: "power2.out" },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const scale = config.scale || 2;
+                        const ease = config.ease || "power2.out";
+                        return gsap.from(el, { duration: duration, scale: scale, opacity: 0, ease: ease });
+                    }
+                },
+                { 
+                    id: 'rotateIn', name: '旋入', enName: 'Rotate In', 
+                    defaultParams: { duration: 1, rotation: -360, ease: "back.out(1.7)" },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const rotation = config.rotation || -360;
+                        const ease = config.ease || "back.out(1.7)";
+                        return gsap.from(el, { duration: duration, rotation: rotation, opacity: 0, scale: 0, ease: ease });
+                    }
+                },
+                { 
+                    id: 'rotateOut', name: '旋出', enName: 'Rotate Out', 
+                    defaultParams: { duration: 1, rotation: 360, ease: "power2.in" },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const rotation = config.rotation || 360;
+                        const ease = config.ease || "power2.in";
+                        return gsap.to(el, { duration: duration, rotation: rotation, opacity: 0, scale: 0, ease: ease });
+                    }
+                },
+                { 
+                    id: 'bounceIn', name: '弹入', enName: 'Bounce In', 
+                    defaultParams: { duration: 1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        return gsap.from(el, { duration: 1, ease: "bounce.out", ...config, scale: 0 });
+                    }
+                },
+                { 
+                    id: 'elasticIn', name: '弹性进入', enName: 'Elastic In', 
+                    defaultParams: { duration: 1.5, x: -300 },
+                    run: function(el, config) {
+                        config = config || {};
+                        return gsap.from(el, { duration: 1.5, x: -300, ease: "elastic.out(1, 0.3)", ...config });
+                    }
+                },
+                { 
+                    id: 'breathing', name: '呼吸', enName: 'Breathing', 
+                    defaultParams: { duration: 1, scale: 1.1, opacity: 0.8 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const scale = config.scale || 1.1;
+                        const opacity = config.opacity || 0.8;
+                        const tl = gsap.timeline({ repeat: -1, yoyo: true });
+                        tl.to(el, { duration: duration, scale: scale, opacity: opacity, ease: "sine.inOut" });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'neonPulse', name: '霓虹脉冲', enName: 'Neon Pulse', 
+                    defaultParams: { duration: 0.5, color: "rgba(0, 243, 255, 1)" },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 0.5;
+                        const color = config.color || "rgba(0, 243, 255, 1)";
+                        const tl = gsap.timeline({ repeat: -1, yoyo: true });
+                        const finalColor = color;
+                        const glowColor = finalColor.replace('1)', '0.8)').replace('rgb', 'rgba');
+                        const bgColor = finalColor.replace('1)', '0.4)').replace('rgb', 'rgba');
+                        tl.to(el, { 
+                            duration: duration, 
+                            boxShadow: `0 0 50px ${finalColor}, 0 0 20px ${glowColor}`,
+                            border: `5px solid ${finalColor}`,
+                            backgroundColor: bgColor
+                        });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'blurIn', name: '模糊进入', enName: 'Blur In', 
+                    defaultParams: { duration: 1, blur: 20 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const blur = config.blur || 20;
+                        return gsap.fromTo(el, 
+                            { filter: `blur(${blur}px)`, opacity: 0 }, 
+                            { duration: duration, filter: "blur(0px)", opacity: 1 }
+                        );
+                    }
+                },
+                { 
+                    id: 'glitch', name: '故障', enName: 'Glitch', 
+                    defaultParams: { duration: 0.1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 0.1;
+                        const tl = gsap.timeline({ repeat: 2 });
+                        tl.to(el, { x: -5, skewX: 5, duration: duration, ease: "steps(1)" })
+                          .to(el, { x: 5, skewX: -5, duration: duration, ease: "steps(1)" })
+                          .to(el, { x: 0, skewX: 0, duration: duration });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'flipX', name: '水平翻转', enName: 'Flip X', 
+                    defaultParams: { duration: 1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const tl = gsap.timeline({ repeat: 1, yoyo: true });
+                        tl.to(el, { duration: duration, rotationX: 360, ease: "back.out(1.7)" });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'flipY', name: '垂直翻转', enName: 'Flip Y', 
+                    defaultParams: { duration: 1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        return gsap.to(el, { duration: duration, rotationY: 360, ease: "back.out(1.7)" });
+                    }
+                },
+                { 
+                    id: 'zoomInRotate', name: '缩放旋转', enName: 'Zoom Rotate', 
+                    defaultParams: { duration: 1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        return gsap.from(el, { duration: duration, scale: 0, rotation: 180, opacity: 0 });
+                    }
+                },
+                { 
+                    id: 'shake', name: '抖动', enName: 'Shake', 
+                    defaultParams: { intensity: 10, speed: 0.1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const intensity = config.intensity || 10;
+                        const speed = config.speed || 0.1;
+                        const tl = gsap.timeline();
+                        tl.to(el, { x: -intensity, duration: speed })
+                          .to(el, { x: intensity, duration: speed })
+                          .to(el, { x: -intensity, duration: speed })
+                          .to(el, { x: intensity, duration: speed })
+                          .to(el, { x: 0, duration: speed });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'swing', name: '摆动', enName: 'Swing', 
+                    defaultParams: { rotation: 15, duration: 0.2 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const rotation = config.rotation || 15;
+                        const duration = config.duration || 0.2;
+                        const t1 = gsap.to(el, { duration: duration, rotation: rotation, transformOrigin: "50% 0%" });
+                        gsap.to(el, { duration: 2, rotation: 0, ease: "elastic.out(1.75, 0.1)", delay: duration });
+                        return t1;
+                    }
+                },
+                { 
+                    id: 'wobble', name: '摇晃', enName: 'Wobble', 
+                    defaultParams: { duration: 0.15, intensity: 1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 0.15;
+                        const intensity = config.intensity || 1;
+                        const i = intensity;
+                        const tl = gsap.timeline();
+                        tl.to(el, { rotation: -5 * i, x: -10 * i, duration: duration })
+                          .to(el, { rotation: 3 * i, x: 10 * i, duration: duration })
+                          .to(el, { rotation: -3 * i, x: -5 * i, duration: duration })
+                          .to(el, { rotation: 2 * i, x: 5 * i, duration: duration })
+                          .to(el, { rotation: 0, x: 0, duration: duration });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'jello', name: '果冻', enName: 'Jello', 
+                    defaultParams: { duration: 0.2, intensity: 1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 0.2;
+                        const intensity = config.intensity || 1;
+                        const i = intensity;
+                        const tl = gsap.timeline();
+                        tl.to(el, { skewX: 12.5 * i, skewY: 12.5 * i, duration: duration })
+                          .to(el, { skewX: -6.25 * i, skewY: -6.25 * i, duration: duration })
+                          .to(el, { skewX: 3.125 * i, skewY: 3.125 * i, duration: duration })
+                          .to(el, { skewX: 0, skewY: 0, duration: duration });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'colorCycle', name: '色彩循环', enName: 'Color Cycle', 
+                    defaultParams: { duration: 1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const tl = gsap.timeline({ repeat: -1, yoyo: true });
+                        tl.to(el, { backgroundColor: "#ff0000", duration: duration })
+                          .to(el, { backgroundColor: "#00ff00", duration: duration })
+                          .to(el, { backgroundColor: "#0000ff", duration: duration });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'flash', name: '闪烁', enName: 'Flash', 
+                    defaultParams: { duration: 0.2 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 0.2;
+                        const tl = gsap.timeline();
+                        tl.to(el, { opacity: 0, duration: duration })
+                          .to(el, { opacity: 1, duration: duration })
+                          .to(el, { opacity: 0, duration: duration })
+                          .to(el, { opacity: 1, duration: duration });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'rubberBand', name: '橡皮筋', enName: 'Rubber Band', 
+                    defaultParams: { duration: 0.1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 0.1;
+                        const tl = gsap.timeline();
+                        tl.to(el, { scaleX: 1.25, scaleY: 0.75, duration: duration * 3 })
+                          .to(el, { scaleX: 0.75, scaleY: 1.25, duration: duration })
+                          .to(el, { scaleX: 1.15, scaleY: 0.85, duration: duration })
+                          .to(el, { scaleX: 0.95, scaleY: 1.05, duration: duration })
+                          .to(el, { scaleX: 1, scaleY: 1, duration: duration });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'tada', name: '哒哒', enName: 'Tada', 
+                    defaultParams: { duration: 0.1, scale: 1.1, rotation: 3 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 0.1;
+                        const scale = config.scale || 1.1;
+                        const rotation = config.rotation || 3;
+                        const tl = gsap.timeline();
+                        tl.to(el, { scale: 0.9, rotation: -rotation, duration: duration })
+                          .to(el, { scale: scale, rotation: rotation, duration: duration })
+                          .to(el, { scale: scale, rotation: -rotation, duration: duration })
+                          .to(el, { scale: scale, rotation: rotation, duration: duration })
+                          .to(el, { scale: 1, rotation: 0, duration: duration });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'heartbeat', name: '心跳', enName: 'Heartbeat', 
+                    defaultParams: { duration: 0.15, scale: 1.3 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 0.15;
+                        const scale = config.scale || 1.3;
+                        const tl = gsap.timeline({ repeat: -1 });
+                        tl.to(el, { scale: scale, duration: duration, ease: "power1.out" })
+                          .to(el, { scale: 1, duration: duration, ease: "power1.in" })
+                          .to(el, { scale: scale, duration: duration, ease: "power1.out", delay: 0.1 })
+                          .to(el, { scale: 1, duration: duration * 2, ease: "power1.in" });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'float', name: '漂浮', enName: 'Float', 
+                    defaultParams: { duration: 2, y: -20 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 2;
+                        const y = config.y || -20;
+                        const tl = gsap.timeline({ repeat: -1, yoyo: true });
+                        tl.to(el, { y: y, duration: duration, ease: "sine.inOut" });
+                        return tl;
+                    }
+                }
+            ],
+            
+            // 文本动画
+            textEffects: [
+                { 
+                    id: 'charFadeIn', name: '字符淡入', enName: 'Char Fade',
+                    defaultParams: { duration: 1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        return gsap.from(el.querySelectorAll('.char') || el, { duration: duration, opacity: 0, stagger: 0.1, ease: "power2.out" });
+                    }
+                },
+                { 
+                    id: 'charSlideUp', name: '字符上滑', enName: 'Char Slide Up',
+                    defaultParams: { duration: 1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        return gsap.from(el.querySelectorAll('.char') || el, { duration: duration, y: 50, opacity: 0, stagger: 0.05, ease: "back.out(2)" });
+                    }
+                },
+                { 
+                    id: 'spacingExpand', name: '间距展开', enName: 'Spacing Exp',
+                    defaultParams: { duration: 1.5 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1.5;
+                        return gsap.from(el, { duration: duration, letterSpacing: "-10px", opacity: 0, ease: "power3.out" });
+                    }
+                },
+                { 
+                    id: 'blurIn', name: '模糊显现', enName: 'Blur Reveal',
+                    defaultParams: { duration: 1.5 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1.5;
+                        return gsap.fromTo(el, { filter: "blur(20px)", opacity: 0 }, { duration: duration, filter: "blur(0px)", opacity: 1, ease: "power2.out" });
+                    }
+                },
+                { 
+                    id: 'elasticChars', name: '弹性字符', enName: 'Elastic Char',
+                    defaultParams: { duration: 1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        return gsap.from(el.querySelectorAll('.char') || el, { duration: duration, scale: 0, opacity: 0, stagger: 0.05, ease: "elastic.out(1, 0.3)" });
+                    }
+                },
+                { 
+                    id: 'scatterReveal', name: '随机分散', enName: 'Scatter Reveal',
+                    defaultParams: { duration: 1.2 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1.2;
+                        return gsap.from(el.querySelectorAll('.char') || el, { duration: duration, yPercent: "random(-200, 200)", rotation: "random(-20, 20)", opacity: 0, stagger: 0.05, ease: "back.out(1.2)" });
+                    }
+                },
+                { 
+                    id: 'gradientwipe', name: '渐变擦除', enName: 'Gradient Wipe',
+                    defaultParams: { duration: 1.5 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1.5;
+                        gsap.set(el, { backgroundImage: "linear-gradient(90deg, #fff 50%, transparent 50%)", backgroundSize: "200% 100%", backgroundClip: "text", webkitBackgroundClip: "text", color: "transparent", backgroundPosition: "100% 0" });
+                        return gsap.to(el, { duration: duration, backgroundPosition: "0% 0", ease: "power2.inOut" });
+                    }
+                },
+                { 
+                    id: 'decode', name: '解码', enName: 'Decode',
+                    defaultParams: { duration: 1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        return gsap.from(el, { duration: duration, filter: "blur(10px)", opacity: 0, ease: "power3.out" });
+                    }
+                },
+                { 
+                    id: 'rainbowFlow', name: '彩虹流动', enName: 'Rainbow',
+                    defaultParams: { duration: 2 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 2;
+                        gsap.set(el, { backgroundImage: "linear-gradient(90deg, #00f3ff, #bc13fe, #00f3ff)", backgroundSize: "200% auto", backgroundClip: "text", webkitBackgroundClip: "text", color: "transparent" });
+                        return gsap.to(el, { duration: duration, backgroundPosition: "200% center", ease: "linear", repeat: -1 });
+                    }
+                },
+                { 
+                    id: 'glitchText', name: '故障文字', enName: 'Glitch Text',
+                    defaultParams: { duration: 0.05 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 0.05;
+                        const tl = gsap.timeline({ repeat: -1, repeatDelay: 2 });
+                        tl.to(el, { skewX: 70, ease: "power4.inOut", duration: duration })
+                          .to(el, { skewX: 0, ease: "power4.inOut", duration: duration })
+                          .to(el, { opacity: 0, duration: duration })
+                          .to(el, { opacity: 1, duration: duration })
+                          .to(el, { x: -20, duration: duration })
+                          .to(el, { x: 0, duration: duration });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'waveText', name: '波浪效果', enName: 'Wave Text',
+                    defaultParams: { duration: 0.5 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 0.5;
+                        const chars = el.querySelectorAll('.char') || el;
+                        const tl = gsap.timeline({ repeat: -1, yoyo: true });
+                        tl.fromTo(chars, { y: 0 }, { y: -20, duration: duration, stagger: { each: 0.1, yoyo: true, repeat: -1 }, ease: "sine.inOut" });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'shadowPop', name: '阴影弹出', enName: 'Shadow Pop',
+                    defaultParams: { duration: 0.3 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 0.3;
+                        return gsap.to(el, { textShadow: "1px 1px rgba(0, 243, 255, 1), 2px 2px rgba(0, 243, 255, 1), 3px 3px rgba(0, 243, 255, 1), 4px 4px rgba(0, 243, 255, 1)", x: -4, y: -4, duration: duration, ease: "power1.out", repeat: -1, yoyo: true, repeatDelay: 0.5 });
+                    }
+                },
+                { 
+                    id: 'neonFlicker', name: '霓虹闪烁', enName: 'Neon Flicker',
+                    defaultParams: { duration: 1 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1;
+                        const tl = gsap.timeline({ repeat: -1 });
+                        tl.to(el, { opacity: 0.5, duration: 0.05 })
+                          .to(el, { opacity: 1, duration: 0.05 })
+                          .to(el, { opacity: 0.3, duration: 0.05 })
+                          .to(el, { opacity: 1, duration: 0.05 })
+                          .to(el, { opacity: 1, duration: duration });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'wordRotate', name: '3D旋转', enName: '3D Rotate',
+                    defaultParams: { duration: 0.5 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 0.5;
+                        gsap.set(el.parentNode, { perspective: 800 });
+                        const words = ["未来", "科技", "动画", "GSAP"];
+                        const tl = gsap.timeline({ repeat: -1 });
+                        words.forEach((word, i) => {
+                            tl.call(() => { el.innerText = word; })
+                              .fromTo(el, { rotationX: 90, opacity: 0 }, { rotationX: 0, opacity: 1, duration: duration })
+                              .to(el, { rotationX: -90, opacity: 0, duration: duration, delay: 1 });
+                        });
+                        return tl;
+                    }
+                },
+                { 
+                    id: 'textScramble', name: '乱码', enName: 'Text Scramble',
+                    defaultParams: { duration: 1.5 },
+                    run: function(el, config) {
+                        config = config || {};
+                        const duration = config.duration || 1.5;
+                        const chars = "!<>-_\\/[]{}—=+*^?#________";
+                        let obj = { val: 0 };
+                        const endText = el.innerText || el.textContent || "";
+                        return gsap.to(obj, {
+                            val: 1,
+                            duration: duration,
+                            onUpdate: () => {
+                                const progress = obj.val;
+                                let str = "";
+                                for(let i=0; i<endText.length; i++) {
+                                    if (progress * endText.length > i) {
+                                        str += endText[i];
+                                    } else {
+                                        str += chars[Math.floor(Math.random() * chars.length)];
+                                    }
+                                }
+                                el.innerText = str;
+                            }
+                        });
+                    }
+                }
+            ]
+        };
+
+        // 全局变量
+        let currentAnimation = null;
+        let currentParams = {};
+        let currentTween = null;
+
+        // DOM元素
+        const animationList = document.getElementById('animationList');
+        const paramsPanel = document.getElementById('paramsPanel');
+        const playBtn = document.getElementById('playBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const jsCode = document.getElementById('jsCode');
+
+        // 动画分类配置
+        const animationCategories = {
+            '入场动画': ['fadeIn', 'slideLeft', 'slideRight', 'slideTop', 'slideBottom', 'scaleUp', 'rotateIn', 'bounceIn', 'elasticIn', 'blurIn', 'flipX', 'flipY', 'zoomInRotate', 'swing'],
+            '强调动画': ['breathing', 'neonPulse', 'shake', 'wobble', 'jello', 'colorCycle', 'flash', 'rubberBand', 'tada', 'heartbeat', 'float'],
+            '退场动画': ['fadeOut', 'scaleDown', 'rotateOut', 'glitch'],
+            '文本入场动画': ['charFadeIn', 'charSlideUp', 'spacingExpand', 'blurIn', 'elasticChars', 'scatterReveal', 'gradientwipe', 'decode'],
+            '文本强调动画': ['rainbowFlow', 'glitchText', 'waveText', 'shadowPop', 'neonFlicker', 'wordRotate'],
+            '文本退场动画': ['textScramble']
+        };
+
+        // 支持无限循环的动画列表
+        const loopableAnimations = ['breathing', 'neonPulse', 'colorCycle', 'heartbeat', 'float', 'rainbowFlow', 'glitchText', 'waveText', 'shadowPop', 'neonFlicker', 'wordRotate'];
+
+        // 初始化
+        function init() {
+            loadAnimationsByCategory();
+            setupEventListeners();
+        }
+
+        // 按分类加载动画列表
+        function loadAnimationsByCategory() {
+            // 清空现有列表
+            animationList.innerHTML = '';
+            
+            // 遍历分类
+            for (const categoryName in animationCategories) {
+                if (animationCategories.hasOwnProperty(categoryName)) {
+                    const animIds = animationCategories[categoryName];
+                    
+                    // 创建分类标题
+                    const categorySection = document.createElement('div');
+                    categorySection.className = 'category-section';
+                    
+                    const categoryTitle = document.createElement('div');
+                    categoryTitle.className = 'category-title';
+                    categoryTitle.textContent = categoryName;
+                    categorySection.appendChild(categoryTitle);
+                    
+                    // 创建分类动画列表
+                    const categoryList = document.createElement('div');
+                    categoryList.className = 'animation-list';
+                    
+                    // 添加该分类下的动画
+                    animIds.forEach(function(animId) {
+                        // 先从元素动画中查找
+                        let anim = AnimationLib.elementEffects.find(function(a) {
+                            return a.id === animId;
+                        });
+                        
+                        // 如果没找到，从文本动画中查找
+                        if (!anim) {
+                            anim = AnimationLib.textEffects.find(function(a) {
+                                return a.id === animId;
+                            });
+                        }
+                        
+                        if (anim) {
+                            const item = document.createElement('div');
+                            item.className = 'animation-item';
+                            item.innerHTML = anim.name + ' <small>(' + anim.enName + ')</small>';
+                            item.onclick = function() {
+                                selectAnimation(anim);
+                            };
+                            categoryList.appendChild(item);
+                        }
+                    });
+                    
+                    categorySection.appendChild(categoryList);
+                    animationList.appendChild(categorySection);
+                }
+            }
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            playBtn.onclick = playAnimation;
+            resetBtn.onclick = resetAnimation;
+        }
+
+        // 选择动画
+        function selectAnimation(animation) {
+            // 移除之前的选中状态
+            const items = document.querySelectorAll('.animation-item');
+            for (let i = 0; i < items.length; i++) {
+                items[i].classList.remove('active');
+            }
+            
+            // 添加当前选中状态
+            const currentTarget = event && event.target ? event.target : null;
+            if (currentTarget) {
+                currentTarget.classList.add('active');
+            }
+            
+            currentAnimation = animation;
+            currentParams = JSON.parse(JSON.stringify(animation.defaultParams));
+            
+            // 重置预览元素
+            const previewElement = document.getElementById('previewElement');
+            previewElement.innerText = '预览文本';
+            previewElement.className = 'preview-target';
+            
+            // 检查是否为文本动画
+            const textAnimations = ['charFadeIn', 'charSlideUp', 'elasticChars', 'scatterReveal', 'waveText', 'spacingExpand', 'blurIn', 'gradientwipe', 'decode', 'rainbowFlow', 'glitchText', 'shadowPop', 'neonFlicker', 'wordRotate', 'textScramble'];
+            if (textAnimations.includes(animation.id)) {
+                // 为需要字符级控制的动画分割文本
+                const text = previewElement.innerText;
+                const chars = text.split('').map(char => {
+                    return `<span class="char" style="display:inline-block; min-width: 0.3em; opacity: 1;">${char}</span>`;
+                }).join('');
+                previewElement.innerHTML = chars;
+                previewElement.classList.add('text-mode');
+            } else if (animation.id.startsWith('text')) {
+                // 其他文本动画
+                previewElement.classList.add('text-mode');
+            }
+            
+            // 生成参数面板
+            generateParamsPanel();
+            
+            // 更新代码
+            updateGeneratedCode();
+        }
+
+        // 生成参数面板
+        function generateParamsPanel() {
+            if (!currentAnimation) return;
+            
+            paramsPanel.innerHTML = '';
+            
+            // 1. 只显示持续时间作为主要可编辑参数
+            const durationItem = document.createElement('div');
+            durationItem.className = 'param-item';
+            
+            const durationLabel = document.createElement('label');
+            durationLabel.className = 'param-label';
+            durationLabel.textContent = 'duration: ' + (currentParams.duration || 1) + '秒';
+            
+            const durationInput = document.createElement('input');
+            durationInput.type = 'range';
+            durationInput.className = 'param-input';
+            durationInput.min = '0.1';
+            durationInput.max = '5';
+            durationInput.step = '0.1';
+            durationInput.value = currentParams.duration || 1;
+            durationInput.oninput = function(e) {
+                currentParams.duration = parseFloat(e.target.value);
+                durationLabel.textContent = 'duration: ' + e.target.value + '秒';
+                updateGeneratedCode();
+            };
+            
+            durationItem.appendChild(durationLabel);
+            durationItem.appendChild(durationInput);
+            paramsPanel.appendChild(durationItem);
+            
+            // 2. 为支持循环的动画添加循环设置选项
+            if (loopableAnimations.includes(currentAnimation.id)) {
+                const loopItem = document.createElement('div');
+                loopItem.className = 'param-item';
+                
+                const loopLabel = document.createElement('label');
+                loopLabel.className = 'param-label';
+                loopLabel.textContent = '循环设置';
+                
+                const loopSelect = document.createElement('select');
+                loopSelect.className = 'param-input';
+                loopSelect.innerHTML = `
+                    <option value="false">仅播放1次</option>
+                    <option value="true">无限循环</option>
+                `;
+                
+                // 添加循环参数到currentParams
+                if (!currentParams.hasOwnProperty('loop')) {
+                    currentParams.loop = false;
+                }
+                loopSelect.value = currentParams.loop ? 'true' : 'false';
+                
+                loopSelect.onchange = function(e) {
+                    currentParams.loop = e.target.value === 'true';
+                    updateGeneratedCode();
+                };
+                
+                loopItem.appendChild(loopLabel);
+                loopItem.appendChild(loopSelect);
+                paramsPanel.appendChild(loopItem);
+            }
+        }
+
+        // 播放动画
+        function playAnimation() {
+            if (!currentAnimation) return;
+            
+            // 重置之前的动画
+            resetAnimation();
+            
+            // 获取目标元素
+            const target = document.getElementById('previewElement');
+            
+            // 检查是否为需要重新分割的文本动画
+            const textAnimations = ['charFadeIn', 'charSlideUp', 'elasticChars', 'scatterReveal', 'waveText'];
+            if (textAnimations.includes(currentAnimation.id)) {
+                // 重新分割文本以确保动画正确执行
+                const text = '预览文本';
+                const chars = text.split('').map(char => {
+                    return `<span class="char" style="display:inline-block; min-width: 0.3em; opacity: 1;">${char}</span>`;
+                }).join('');
+                target.innerHTML = chars;
+                target.classList.add('text-mode');
+            }
+            
+            // 执行动画
+            currentTween = currentAnimation.run(target, currentParams);
+        }
+
+        // 重置动画
+        function resetAnimation() {
+            // 杀死所有动画
+            if (currentTween && typeof currentTween.kill === 'function') {
+                currentTween.kill();
+            }
+            
+            // 重置元素状态
+            const element = document.getElementById('previewElement');
+            
+            // 恢复原始文本和样式
+            element.innerText = '预览文本';
+            element.className = 'preview-target';
+            
+            // 清除GSAP属性
+            gsap.set(element, { clearProps: 'all' });
+        }
+
+        // 更新生成的代码
+        function updateGeneratedCode() {
+            if (!currentAnimation) return;
+            
+            // 生成符合要求的动画对象格式
+            let code = '            {\n';
+            code += '                id: \'' + currentAnimation.id + '\',\n';
+            code += '                name: \'' + currentAnimation.name + '\',\n';
+            code += '                enName: \'' + currentAnimation.enName + '\',\n';
+            code += '                defaultParams: { duration: ' + (currentParams.duration || 1) + ' },\n';
+            
+            // 构建run函数
+            code += '                run: function(el, config) {\n';
+            code += '                    config = config || {};\n';
+            code += '                    const duration = config.duration || ' + (currentParams.duration || 1) + ';\n';
+            
+            // 生成动画执行代码
+            let animationCode = '';
+            
+            // 基础动画类型
+            if (currentAnimation.id === 'fadeIn') {
+                animationCode = '                    return gsap.from(el, { duration: duration, opacity: 0, ease: "power1.out" });\n';
+            } else if (currentAnimation.id === 'fadeOut') {
+                animationCode = '                    return gsap.to(el, { duration: duration, opacity: 0, ease: "power1.in" });\n';
+            } else if (currentAnimation.id.includes('slide')) {
+                const direction = currentAnimation.id === 'slideLeft' ? '-' : '';
+                animationCode = '                    return gsap.from(el, { duration: duration, x: ' + direction + '300, opacity: 0, ease: "power2.out" });\n';
+            } else if (currentAnimation.id === 'scaleUp') {
+                animationCode = '                    return gsap.from(el, { duration: duration, scale: 0, opacity: 0, ease: "back.out(1.7)" });\n';
+            } else if (currentAnimation.id === 'scaleDown') {
+                animationCode = '                    return gsap.from(el, { duration: duration, scale: 2, opacity: 0, ease: "power2.out" });\n';
+            } else if (currentAnimation.id === 'rotateIn') {
+                animationCode = '                    return gsap.from(el, { duration: duration, rotation: -360, opacity: 0, scale: 0, ease: "back.out(1.7)" });\n';
+            } else if (currentAnimation.id === 'rotateOut') {
+                animationCode = '                    return gsap.to(el, { duration: duration, rotation: 360, opacity: 0, scale: 0, ease: "power2.in" });\n';
+            } else if (currentAnimation.id === 'bounceIn') {
+                animationCode = '                    return gsap.from(el, { duration: duration, ease: "bounce.out", scale: 0 });\n';
+            } else if (currentAnimation.id === 'elasticIn') {
+                animationCode = '                    return gsap.from(el, { duration: duration, x: -300, ease: "elastic.out(1, 0.3)" });\n';
+            } else if (currentAnimation.id === 'blurIn') {
+                animationCode = '                    const blur = config.blur || 20;\n';
+                animationCode += '                    return gsap.fromTo(el, { filter: `blur(${blur}px)`, opacity: 0 }, { duration: duration, filter: "blur(0px)", opacity: 1 });\n';
+            } else if (loopableAnimations.includes(currentAnimation.id)) {
+                // 支持循环的动画
+                const loop = currentParams.loop ? '-1' : '0';
+                const yoyo = currentParams.loop ? 'true' : 'false';
+                
+                if (currentAnimation.id === 'breathing') {
+                    animationCode = '                    const scale = config.scale || 1.1;\n';
+                    animationCode += '                    const opacity = config.opacity || 0.8;\n';
+                    animationCode += '                    const tl = gsap.timeline({ repeat: ' + loop + ', yoyo: ' + yoyo + ' });\n';
+                    animationCode += '                    tl.to(el, { duration: duration, scale: scale, opacity: opacity, ease: "sine.inOut" });\n';
+                    animationCode += '                    return tl;\n';
+                } else if (currentAnimation.id === 'neonPulse') {
+                    animationCode = '                    const color = config.color || "rgba(0, 243, 255, 1)";\n';
+                    animationCode += '                    const finalColor = color;\n';
+                    animationCode += '                    const glowColor = finalColor.replace(\'1)\', \'0.8)\').replace(\'rgb\', \'rgba\');\n';
+                    animationCode += '                    const bgColor = finalColor.replace(\'1)\', \'0.4)\').replace(\'rgb\', \'rgba\');\n';
+                    animationCode += '                    const tl = gsap.timeline({ repeat: ' + loop + ', yoyo: ' + yoyo + ' });\n';
+                    animationCode += '                    tl.to(el, { duration: duration, boxShadow: `0 0 50px ${finalColor}, 0 0 20px ${glowColor}`, border: `5px solid ${finalColor}`, backgroundColor: bgColor });\n';
+                    animationCode += '                    return tl;\n';
+                } else if (currentAnimation.id === 'colorCycle') {
+                    animationCode = '                    const tl = gsap.timeline({ repeat: ' + loop + ', yoyo: ' + yoyo + ' });\n';
+                    animationCode += '                    tl.to(el, { backgroundColor: "#ff0000", duration: duration })\n';
+                    animationCode += '                      .to(el, { backgroundColor: "#00ff00", duration: duration })\n';
+                    animationCode += '                      .to(el, { backgroundColor: "#0000ff", duration: duration });\n';
+                    animationCode += '                    return tl;\n';
+                } else if (currentAnimation.id === 'heartbeat') {
+                    animationCode = '                    const scale = config.scale || 1.3;\n';
+                    animationCode += '                    const tl = gsap.timeline({ repeat: ' + loop + ' });\n';
+                    animationCode += '                    tl.to(el, { scale: scale, duration: duration, ease: "power1.out" })\n';
+                    animationCode += '                      .to(el, { scale: 1, duration: duration, ease: "power1.in" })\n';
+                    animationCode += '                      .to(el, { scale: scale, duration: duration, ease: "power1.out", delay: 0.1 })\n';
+                    animationCode += '                      .to(el, { scale: 1, duration: duration * 2, ease: "power1.in" });\n';
+                    animationCode += '                    return tl;\n';
+                } else if (currentAnimation.id === 'float') {
+                    animationCode = '                    const y = config.y || -20;\n';
+                    animationCode += '                    const tl = gsap.timeline({ repeat: ' + loop + ', yoyo: ' + yoyo + ' });\n';
+                    animationCode += '                    tl.to(el, { y: y, duration: duration, ease: "sine.inOut" });\n';
+                    animationCode += '                    return tl;\n';
+                }
+            } else {
+                // 其他强调动画
+                animationCode = '                    const tl = gsap.timeline();\n';
+                
+                if (currentAnimation.id === 'shake') {
+                    animationCode += '                    const intensity = config.intensity || 10;\n';
+                    animationCode += '                    const speed = config.speed || 0.1;\n';
+                    animationCode += '                    tl.to(el, { x: -intensity, duration: speed })\n';
+                    animationCode += '                      .to(el, { x: intensity, duration: speed })\n';
+                    animationCode += '                      .to(el, { x: -intensity, duration: speed })\n';
+                    animationCode += '                      .to(el, { x: intensity, duration: speed })\n';
+                    animationCode += '                      .to(el, { x: 0, duration: speed });\n';
+                } else if (currentAnimation.id === 'wobble') {
+                    animationCode += '                    const intensity = config.intensity || 1;\n';
+                    animationCode += '                    const i = intensity;\n';
+                    animationCode += '                    tl.to(el, { rotation: -5 * i, x: -10 * i, duration: duration })\n';
+                    animationCode += '                      .to(el, { rotation: 3 * i, x: 10 * i, duration: duration })\n';
+                    animationCode += '                      .to(el, { rotation: -3 * i, x: -5 * i, duration: duration })\n';
+                    animationCode += '                      .to(el, { rotation: 2 * i, x: 5 * i, duration: duration })\n';
+                    animationCode += '                      .to(el, { rotation: 0, x: 0, duration: duration });\n';
+                } else if (currentAnimation.id === 'jello') {
+                    animationCode += '                    const intensity = config.intensity || 1;\n';
+                    animationCode += '                    const i = intensity;\n';
+                    animationCode += '                    tl.to(el, { skewX: 12.5 * i, skewY: 12.5 * i, duration: duration })\n';
+                    animationCode += '                      .to(el, { skewX: -6.25 * i, skewY: -6.25 * i, duration: duration })\n';
+                    animationCode += '                      .to(el, { skewX: 3.125 * i, skewY: 3.125 * i, duration: duration })\n';
+                    animationCode += '                      .to(el, { skewX: 0, skewY: 0, duration: duration });\n';
+                } else if (currentAnimation.id === 'flash') {
+                    animationCode += '                    tl.to(el, { opacity: 0, duration: duration })\n';
+                    animationCode += '                      .to(el, { opacity: 1, duration: duration })\n';
+                    animationCode += '                      .to(el, { opacity: 0, duration: duration })\n';
+                    animationCode += '                      .to(el, { opacity: 1, duration: duration });\n';
+                } else if (currentAnimation.id === 'rubberBand') {
+                    animationCode += '                    tl.to(el, { scaleX: 1.25, scaleY: 0.75, duration: duration * 3 })\n';
+                    animationCode += '                      .to(el, { scaleX: 0.75, scaleY: 1.25, duration: duration })\n';
+                    animationCode += '                      .to(el, { scaleX: 1.15, scaleY: 0.85, duration: duration })\n';
+                    animationCode += '                      .to(el, { scaleX: 0.95, scaleY: 1.05, duration: duration })\n';
+                    animationCode += '                      .to(el, { scaleX: 1, scaleY: 1, duration: duration });\n';
+                } else if (currentAnimation.id === 'tada') {
+                    animationCode += '                    const scale = config.scale || 1.1;\n';
+                    animationCode += '                    const rotation = config.rotation || 3;\n';
+                    animationCode += '                    tl.to(el, { scale: 0.9, rotation: -rotation, duration: duration })\n';
+                    animationCode += '                      .to(el, { scale: scale, rotation: rotation, duration: duration })\n';
+                    animationCode += '                      .to(el, { scale: scale, rotation: -rotation, duration: duration })\n';
+                    animationCode += '                      .to(el, { scale: scale, rotation: rotation, duration: duration })\n';
+                    animationCode += '                      .to(el, { scale: 1, rotation: 0, duration: duration });\n';
+                } else if (currentAnimation.id === 'glitch') {
+                    animationCode += '                    tl.to(el, { x: -5, skewX: 5, duration: duration, ease: "steps(1)" })\n';
+                    animationCode += '                      .to(el, { x: 5, skewX: -5, duration: duration, ease: "steps(1)" })\n';
+                    animationCode += '                      .to(el, { x: 0, skewX: 0, duration: duration });\n';
+                } else if (currentAnimation.id === 'flipX') {
+                    animationCode += '                    const tl = gsap.timeline({ repeat: 1, yoyo: true });\n';
+                    animationCode += '                    tl.to(el, { duration: duration, rotationX: 360, ease: "back.out(1.7)" });\n';
+                } else if (currentAnimation.id === 'flipY') {
+                    animationCode += '                    return gsap.to(el, { duration: duration, rotationY: 360, ease: "back.out(1.7)" });\n';
+                } else if (currentAnimation.id === 'zoomInRotate') {
+                    animationCode += '                    return gsap.from(el, { duration: duration, scale: 0, rotation: 180, opacity: 0 });\n';
+                } else if (currentAnimation.id === 'swing') {
+                    animationCode += '                    const rotation = config.rotation || 15;\n';
+                    animationCode += '                    const t1 = gsap.to(el, { duration: duration, rotation: rotation, transformOrigin: "50% 0%" });\n';
+                    animationCode += '                    gsap.to(el, { duration: 2, rotation: 0, ease: "elastic.out(1.75, 0.1)", delay: duration });\n';
+                    animationCode += '                    return t1;\n';
+                }
+                
+                if (!animationCode.includes('return')) {
+                    animationCode += '                    return tl;\n';
+                }
+            }
+            
+            // 拼接完整代码
+            code += animationCode;
+            code += '                }\n';
+            code += '            },';
+            
+            jsCode.textContent = code;
+        }
+
+        // 复制代码到剪贴板
+        function copyCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const textArea = document.createElement('textarea');
+            textArea.value = codeElement.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            // 显示复制成功提示
+            alert('代码已复制到剪贴板！');
+        }
+
+        // 初始化应用
+        window.onload = init;
+    </script>
+</body>
+</html>

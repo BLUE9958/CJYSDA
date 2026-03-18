@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSAP 动画库 - 动画展示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .controls button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .controls button:hover {
+            background: #2980b9;
+        }
+
+        .category {
+            margin-bottom: 40px;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .category h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .sub-category {
+            margin-bottom: 30px;
+        }
+
+        .sub-category h3 {
+            color: #34495e;
+            margin: 20px 0 15px 0;
+            font-size: 1.2em;
+        }
+
+        .animation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 20px;
+        }
+
+        .animation-item {
+            text-align: center;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .animation-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: white;
+        }
+
+        .animation-preview {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .animation-preview img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .animation-name {
+            font-size: 12px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .animation-en-name {
+            font-size: 10px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .animation-actions button {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            margin: 2px;
+        }
+
+        .animation-actions button:hover {
+            background: #27ae60;
+        }
+
+        .download-all-btn {
+            background: #e74c3c !important;
+        }
+
+        .download-all-btn:hover {
+            background: #c0392b !important;
+        }
+
+        .no-gif {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background-color: #f8f9fa;
+            border: 1px dashed #ccc;
+            color: #999;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .animation-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 15px;
+            }
+            
+            .animation-preview {
+                width: 70px;
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>GSAP 动画库</h1>
+            <p>动画效果展示与下载</p>
+        </header>
+
+        <div class="controls">
+            <button onclick="downloadAllGifs()">下载所有动画 GIF</button>
+            <button onclick="downloadAllElementGifs()">下载所有元素动画</button>
+            <button onclick="downloadAllTextGifs()">下载所有文本动画</button>
+        </div>
+
+        <!-- 元素动画分类 -->
+        <section class="category">
+            <h2>🎯 普通元素动画 (Element Effects)</h2>
+            
+            <!-- 入场动画 -->
+            <div class="sub-category">
+                <h3>出场动画 (入场效果)</h3>
+                <div class="animation-grid" id="element-entrance-animations">
+                    <!-- 动画项将通过JavaScript动态填充 -->
+                </div>
+            </div>
+            
+            <!-- 强调动画 -->
+            <div class="sub-category">
+                <h3>强调动画 (持续效果)</h3>
+                <div class="animation-grid" id="element-emphasis-animations">
+                    <!-- 动画项将通过JavaScript动态填充 -->
+                </div>
+            </div>
+            
+            <!-- 退场动画 -->
+            <div class="sub-category">
+                <h3>退场动画 (离场效果)</h3>
+                <div class="animation-grid" id="element-exit-animations">
+                    <!-- 动画项将通过JavaScript动态填充 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 文本动画分类 -->
+        <section class="category">
+            <h2>📝 文本动画 (Text Effects)</h2>
+            
+            <!-- 文本入场动画 -->
+            <div class="sub-category">
+                <h3>出场动画 (入场效果)</h3>
+                <div class="animation-grid" id="text-entrance-animations">
+                    <!-- 动画项将通过JavaScript动态填充 -->
+                </div>
+            </div>
+            
+            <!-- 文本强调动画 -->
+            <div class="sub-category">
+                <h3>强调动画 (持续效果)</h3>
+                <div class="animation-grid" id="text-emphasis-animations">
+                    <!-- 动画项将通过JavaScript动态填充 -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        // 动画数据定义
+        const animationData = {
+            element: {
+                entrance: [
+                    { id: 'fadeIn', name: '淡入', enName: 'Fade In' },
+                    { id: 'slideLeft', name: '左滑', enName: 'Slide Left' },
+                    { id: 'slideRight', name: '右滑', enName: 'Slide Right' },
+                    { id: 'slideTop', name: '上滑', enName: 'Slide Top' },
+                    { id: 'slideBottom', name: '下滑', enName: 'Slide Bottom' },
+                    { id: 'scaleUp', name: '放大', enName: 'Scale Up' },
+                    { id: 'rotateIn', name: '旋入', enName: 'Rotate In' },
+                    { id: 'bounceIn', name: '弹入', enName: 'Bounce In' },
+                    { id: 'elasticIn', name: '弹性进入', enName: 'Elastic In' },
+                    { id: 'blurIn', name: '模糊进入', enName: 'Blur In' },
+                    { id: 'flipX', name: '水平翻转进入', enName: 'Flip X' },
+                    { id: 'flipY', name: '垂直翻转进入', enName: 'Flip Y' },
+                    { id: 'zoomInRotate', name: '缩放旋转进入', enName: 'Zoom Rotate' },
+                    { id: 'swing', name: '摆动进入', enName: 'Swing' }
+                ],
+                emphasis: [
+                    { id: 'breathing', name: '呼吸效果', enName: 'Breathing' },
+                    { id: 'neonPulse', name: '霓虹脉冲', enName: 'Neon Pulse' },
+                    { id: 'shake', name: '抖动', enName: 'Shake' },
+                    { id: 'wobble', name: '摇晃', enName: 'Wobble' },
+                    { id: 'jello', name: '果冻', enName: 'Jello' },
+                    { id: 'colorCycle', name: '色彩循环', enName: 'Color Cycle' },
+                    { id: 'flash', name: '闪烁', enName: 'Flash' },
+                    { id: 'rubberBand', name: '橡皮筋', enName: 'Rubber Band' },
+                    { id: 'tada', name: '哒哒', enName: 'Tada' },
+                    { id: 'heartbeat', name: '心跳', enName: 'Heartbeat' },
+                    { id: 'float', name: '漂浮', enName: 'Float' }
+                ],
+                exit: [
+                    { id: 'fadeOut', name: '淡出', enName: 'Fade Out' },
+                    { id: 'scaleDown', name: '缩小离开', enName: 'Scale Down' },
+                    { id: 'rotateOut', name: '旋出', enName: 'Rotate Out' },
+                    { id: 'glitch', name: '故障效果', enName: 'Glitch' }
+                ]
+            },
+            text: {
+                entrance: [
+                    { id: 'charFadeIn', name: '字符淡入', enName: 'Char Fade In' },
+                    { id: 'charSlideUp', name: '字符上滑', enName: 'Char Slide Up' },
+                    { id: 'spacingExpand', name: '间距展开', enName: 'Spacing Expand' },
+                    { id: 'blurReveal', name: '模糊显现', enName: 'Blur Reveal' },
+                    { id: 'elasticChars', name: '弹性字符', enName: 'Elastic Chars' },
+                    { id: 'scatterReveal', name: '随机分散', enName: 'Scatter Reveal' },
+                    { id: 'gradientwipe', name: '渐变擦除', enName: 'Gradient Wipe' },
+                    { id: 'decode', name: '解码效果', enName: 'Decode' }
+                ],
+                emphasis: [
+                    { id: 'rainbowFlow', name: '彩虹流动', enName: 'Rainbow Flow' },
+                    { id: 'glitchText', name: '故障文字', enName: 'Glitch Text' },
+                    { id: 'waveText', name: '波浪效果', enName: 'Wave Text' },
+                    { id: 'shadowPop', name: '阴影弹出', enName: 'Shadow Pop' },
+                    { id: 'neonFlicker', name: '霓虹闪烁', enName: 'Neon Flicker' },
+                    { id: 'wordRotate', name: '3D旋转', enName: '3D Rotate' }
+                ]
+            }
+        };
+
+        // 文件路径配置
+        const gifPathConfig = {
+            element: '_element.gif',
+            text: '_text.gif'
+        };
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderAnimations();
+        });
+
+        // 渲染所有动画
+        function renderAnimations() {
+            // 渲染元素动画
+            renderCategory('element', 'entrance', 'element-entrance-animations');
+            renderCategory('element', 'emphasis', 'element-emphasis-animations');
+            renderCategory('element', 'exit', 'element-exit-animations');
+            
+            // 渲染文本动画
+            renderCategory('text', 'entrance', 'text-entrance-animations');
+            renderCategory('text', 'emphasis', 'text-emphasis-animations');
+        }
+
+        // 渲染特定分类的动画
+        function renderCategory(type, category, containerId) {
+            const container = document.getElementById(containerId);
+            const animations = animationData[type][category];
+            
+            container.innerHTML = ''; // 清空容器
+            
+            animations.forEach(anim => {
+                const item = createAnimationItem(anim, type);
+                container.appendChild(item);
+            });
+        }
+
+        // 创建单个动画项
+        function createAnimationItem(anim, type) {
+            const item = document.createElement('div');
+            item.className = 'animation-item';
+            
+            // 构造GIF文件路径
+            const gifFileName = `${anim.id}${gifPathConfig[type]}`;
+            const gifPath = `animated_gifs/${gifFileName}`;
+            
+            item.innerHTML = `
+                <div class="animation-preview">
+                    <img src="${gifPath}" alt="${anim.name}" onerror="this.parentElement.innerHTML='<div class=\'no-gif\'>GIF<br>未生成</div>'">
+                </div>
+                <div class="animation-name">${anim.name}</div>
+                <div class="animation-en-name">${anim.enName}</div>
+                <div class="animation-actions">
+                    <button onclick="downloadGif('${gifPath}', '${anim.id}.gif')">下载</button>
+                </div>
+            `;
+            
+            return item;
+        }
+
+        // 下载单个GIF
+        function downloadGif(gifPath, filename) {
+            fetch(gifPath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('GIF文件不存在: ' + gifPath);
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                })
+                .catch(error => {
+                    console.error('下载失败:', error);
+                    alert('下载失败: ' + error.message);
+                });
+        }
+
+        // 获取所有GIF文件列表
+        function getAllGifs() {
+            const allGifs = [];
+            
+            // 元素动画
+            Object.keys(animationData.element).forEach(category => {
+                animationData.element[category].forEach(anim => {
+                    allGifs.push({
+                        path: `animated_gifs/${anim.id}${gifPathConfig.element}`,
+                        filename: `${anim.id}_element.gif`,
+                        category: 'element',
+                        subcategory: category
+                    });
+                });
+            });
+            
+            // 文本动画
+            Object.keys(animationData.text).forEach(category => {
+                animationData.text[category].forEach(anim => {
+                    allGifs.push({
+                        path: `animated_gifs/${anim.id}${gifPathConfig.text}`,
+                        filename: `${anim.id}_text.gif`,
+                        category: 'text',
+                        subcategory: category
+                    });
+                });
+            });
+            
+            return allGifs;
+        }
+
+        // 获取元素动画GIF列表
+        function getElementGifs() {
+            const elementGifs = [];
+            
+            Object.keys(animationData.element).forEach(category => {
+                animationData.element[category].forEach(anim => {
+                    elementGifs.push({
+                        path: `animated_gifs/${anim.id}${gifPathConfig.element}`,
+                        filename: `${anim.id}_element.gif`,
+                        category: 'element',
+                        subcategory: category
+                    });
+                });
+            });
+            
+            return elementGifs;
+        }
+
+        // 获取文本动画GIF列表
+        function getTextGifs() {
+            const textGifs = [];
+            
+            Object.keys(animationData.text).forEach(category => {
+                animationData.text[category].forEach(anim => {
+                    textGifs.push({
+                        path: `animated_gifs/${anim.id}${gifPathConfig.text}`,
+                        filename: `${anim.id}_text.gif`,
+                        category: 'text',
+                        subcategory: category
+                    });
+                });
+            });
+            
+            return textGifs;
+        }
+
+        // 下载所有GIF
+        async function downloadAllGifs() {
+            const allGifs = getAllGifs();
+            await downloadMultipleGifs(allGifs, 'all_animations.zip');
+        }
+
+        // 下载所有元素动画GIF
+        async function downloadAllElementGifs() {
+            const elementGifs = getElementGifs();
+            await downloadMultipleGifs(elementGifs, 'element_animations.zip');
+        }
+
+        // 下载所有文本动画GIF
+        async function downloadAllTextGifs() {
+            const textGifs = getTextGifs();
+            await downloadMultipleGifs(textGifs, 'text_animations.zip');
+        }
+
+        // 下载多个GIF并打包成ZIP
+        async function downloadMultipleGifs(gifList, zipFilename) {
+            try {
+                const zip = new JSZip();
+                const total = gifList.length;
+                let completed = 0;
+                
+                // 显示进度
+                let progressDiv = document.getElementById('download-progress');
+                if (!progressDiv) {
+                    progressDiv = document.createElement('div');
+                    progressDiv.id = 'download-progress';
+                    progressDiv.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #333;
+                        color: white;
+                        padding: 15px;
+                        border-radius: 5px;
+                        z-index: 10000;
+                        font-family: Arial, sans-serif;
+                    `;
+                    document.body.appendChild(progressDiv);
+                }
+                
+                // 显示初始进度
+                progressDiv.innerHTML = `下载进度: ${completed}/${total} (准备中...)`;
+                
+                // 逐个下载GIF文件
+                for (const gif of gifList) {
+                    try {
+                        const response = await fetch(gif.path);
+                        if (response.ok) {
+                            const blob = await response.blob();
+                            zip.file(gif.filename, blob);
+                            completed++;
+                        } else {
+                            console.warn(`文件不存在: ${gif.path}`);
+                        }
+                        // 更新进度
+                        progressDiv.innerHTML = `下载进度: ${completed}/${total}`;
+                    } catch (error) {
+                        console.error(`下载失败 ${gif.path}:`, error);
+                        // 继续下载下一个文件
+                    }
+                }
+                
+                // 生成ZIP文件
+                progressDiv.innerHTML = `正在生成ZIP文件...`;
+                const content = await zip.generateAsync({type:"blob"});
+                
+                // 下载ZIP文件
+                const url = window.URL.createObjectURL(content);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = zipFilename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                // 移除进度显示
+                document.body.removeChild(progressDiv);
+                
+                alert(`所有GIF已打包下载完成！共 ${completed} 个文件`);
+            } catch (error) {
+                console.error('打包下载失败:', error);
+                alert('打包下载失败: ' + error.message);
+                
+                // 移除进度显示
+                const progressDiv = document.getElementById('download-progress');
+                if (progressDiv) {
+                    document.body.removeChild(progressDiv);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

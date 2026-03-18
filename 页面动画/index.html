@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面过渡动画预览</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-exchange-alt"></i> 页面过渡动画预览</h1>
+            <p class="subtitle">基于GSAP的动画效果组合展示</p>
+        </header>
+
+        <div class="main-content">
+            <!-- 动画组合展示区域 -->
+            <section class="preset-section">
+                <h2><i class="fas fa-th-large"></i> 动画组合</h2>
+                <p>选择以下预定义的动画组合效果：</p>
+                <div class="preset-selector">
+                    <select id="presetSelector" class="preset-dropdown">
+                        <option value="">请选择动画组合</option>
+                        <option value="slideInOut">滑入滑出</option>
+                        <option value="fadeInOut">淡入淡出</option>
+                        <option value="pageCurl">页面卷曲</option>
+                        <option value="pushEffect">推出</option>
+                        <option value="scaleSlide">缩放滑入</option>
+                        <option value="staggeredFade">交错淡入</option>
+                        <option value="elasticSlide">弹性滑入</option>
+                        <option value="zoomFade">缩放淡入</option>
+                        <option value="cameraPush">运镜推近</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- 预览区域 -->
+            <section class="preview-section">
+                <h2><i class="fas fa-eye"></i> 动画预览</h2>
+                <div class="preview-container" id="previewContainer">
+                    <!-- 当前页面 -->
+                    <div class="page current-page active" id="currentPage">
+                        <div class="page-content">
+                            <img src="A.png" alt="页面 A" class="page-image">
+                        </div>
+                    </div>
+                    
+                    <!-- 新页面 -->
+                    <div class="page new-page" id="newPage">
+                        <div class="page-content">
+                            <img src="B.png" alt="页面 B" class="page-image">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 控制按钮 -->
+                <div class="control-buttons">
+                    <button id="playBtn" class="btn primary">
+                        <i class="fas fa-play"></i> 播放动画
+                    </button>
+                    <button id="stopBtn" class="btn danger">
+                        <i class="fas fa-stop"></i> 停止
+                    </button>
+                    <button id="resetBtn" class="btn secondary">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
+                </div>
+            </section>
+
+            <!-- 代码编辑区域 -->
+            <section class="code-section">
+                <h2><i class="fas fa-code"></i> 动画配置代码</h2>
+                <p>编辑以下代码以自定义动画效果，实时预览变更：</p>
+                
+                <!-- 代码编辑器 -->
+                <div class="code-editor-container">
+                    <div class="code-header">
+                        <h3 id="codePresetName">选择一个动画组合查看代码</h3>
+                        <div class="code-actions">
+                            <button id="applyCodeBtn" class="btn primary small">
+                                <i class="fas fa-check"></i> 应用变更
+                            </button>
+                            <button id="replaceJsBtn" class="btn secondary small">
+                                <i class="fas fa-save"></i> 替换到JS文件
+                            </button>
+                        </div>
+                    </div>
+                    <pre><code id="codeEditor" contenteditable="true" class="javascript">// 选择一个动画组合查看和编辑代码</code></pre>
+                </div>
+                
+                <!-- 代码编辑提示 -->
+                <div class="code-tips">
+                    <p><i class="fas fa-info-circle"></i> 提示：编辑代码后点击"应用变更"按钮可实时预览效果，点击"替换到JS文件"可保存到animations.js文件。</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // 等待GSAP库加载完成后再执行animations.js
+        function loadGSAPAndAnimations() {
+            console.log('检查GSAP库加载状态...');
+            if (typeof gsap !== 'undefined') {
+                console.log('GSAP库已加载，开始加载animations.js...');
+                // GSAP已加载，现在加载animations.js
+                const script = document.createElement('script');
+                script.src = 'animations.js';
+                script.onload = function() {
+                    console.log('animations.js加载完成，初始化控制器...');
+                    // animations.js加载完成后初始化控制器
+                    try {
+                        new SimplifiedPreviewController();
+                        console.log('控制器初始化完成');
+                    } catch (error) {
+                        console.error('控制器初始化失败:', error);
+                    }
+                };
+                script.onerror = function() {
+                    console.error('animations.js加载失败');
+                };
+                document.body.appendChild(script);
+            } else {
+                console.log('GSAP库未加载，重试...');
+                // GSAP未加载，重试
+                setTimeout(loadGSAPAndAnimations, 100);
+            }
+        }
+        
+        class SimplifiedPreviewController {
+            constructor() {
+                console.log('开始初始化SimplifiedPreviewController...');
+                
+                try {
+                    console.log('获取PageTransitionManager对象...');
+                    this.manager = window.PageTransitionManager;
+                    console.log('PageTransitionManager对象:', this.manager);
+                    
+                    console.log('获取页面元素...');
+                    this.currentPage = document.getElementById('currentPage');
+                    this.newPage = document.getElementById('newPage');
+                    console.log('当前页面元素:', this.currentPage);
+                    console.log('新页面元素:', this.newPage);
+                    
+                    this.isAnimating = false;
+                    this.currentPresetId = null;
+                    this.currentPreset = null;
+                    
+                    console.log('初始化控制器...');
+                    this.init();
+                    console.log('SimplifiedPreviewController初始化完成');
+                } catch (error) {
+                    console.error('SimplifiedPreviewController构造函数失败:', error);
+                }
+            }
+            
+            init() {
+                this.initPresetSelector();
+                this.bindEvents();
+            }
+            
+            initPresetSelector() {
+                console.log('开始初始化下拉框...');
+                const selector = document.getElementById('presetSelector');
+                console.log('找到下拉框元素:', selector);
+                
+                try {
+                    const presets = this.manager.getAllPresets();
+                    console.log('获取到的预设列表:', presets);
+                    
+                    presets.forEach(preset => {
+                        console.log('添加预设选项:', preset.name, preset.id);
+                        const option = document.createElement('option');
+                        option.value = preset.id;
+                        option.textContent = preset.name;
+                        selector.appendChild(option);
+                    });
+                    
+                    console.log('下拉框初始化完成');
+                } catch (error) {
+                    console.error('下拉框初始化失败:', error);
+                }
+            }
+            
+            selectPreset(presetId) {
+                if (!presetId) {
+                    this.currentPresetId = null;
+                    this.currentPreset = null;
+                    this.resetCodeEditor();
+                    return;
+                }
+                
+                this.currentPresetId = presetId;
+                
+                // 获取当前预设的完整信息
+                this.currentPreset = this.getPresetById(presetId);
+                
+                // 显示代码
+                this.displayPresetCode();
+            }
+            
+            resetCodeEditor() {
+                const codeEditor = document.getElementById('codeEditor');
+                const codePresetName = document.getElementById('codePresetName');
+                codePresetName.textContent = '选择一个动画组合查看代码';
+                codeEditor.textContent = '// 选择一个动画组合查看和编辑代码';
+            }
+            
+            // 根据ID获取预设的完整信息
+            getPresetById(presetId) {
+                return this.manager.presets.find(preset => preset.id === presetId);
+            }
+            
+            // 显示预设代码
+            displayPresetCode() {
+                if (!this.currentPreset) return;
+                
+                const codeEditor = document.getElementById('codeEditor');
+                const codePresetName = document.getElementById('codePresetName');
+                
+                // 更新代码标题
+                codePresetName.textContent = `${this.currentPreset.name} - 动画配置代码`;
+                
+                // 生成代码
+                const code = `// ${this.currentPreset.name} 动画配置
+{
+    id: '${this.currentPreset.id}',
+    name: '${this.currentPreset.name}',
+    description: '${this.currentPreset.description}',
+    exit: '${this.currentPreset.exit}',
+    enter: '${this.currentPreset.enter}',
+    exitParams: ${JSON.stringify(this.currentPreset.exitParams, null, 4)},
+    enterParams: ${JSON.stringify(this.currentPreset.enterParams, null, 4)}
+}`;
+                
+                // 显示代码
+                codeEditor.textContent = code;
+            }
+            
+            // 应用代码变更
+            applyCodeChanges() {
+                if (!this.currentPreset) {
+                    alert('请先选择一个动画组合');
+                    return;
+                }
+                
+                const codeEditor = document.getElementById('codeEditor');
+                const code = codeEditor.textContent;
+                
+                try {
+                    // 解析代码
+                    const updatedPreset = eval(`(${code})`);
+                    
+                    // 验证必要字段
+                    if (!updatedPreset.exit || !updatedPreset.enter) {
+                        throw new Error('代码缺少必要的exit或enter字段');
+                    }
+                    
+                    // 更新当前预设
+                    this.currentPreset = updatedPreset;
+                    
+                    // 重置动画状态
+                    this.resetAnimation();
+                    
+                    // 显示成功消息
+                    alert('代码变更已应用，您可以播放动画查看效果');
+                } catch (error) {
+                    console.error('代码解析失败:', error);
+                    alert('代码解析失败: ' + error.message);
+                }
+            }
+            
+            // 替换到JS文件
+            replaceToJsFile() {
+                if (!this.currentPreset) {
+                    alert('请先选择一个动画组合');
+                    return;
+                }
+                
+                const codeEditor = document.getElementById('codeEditor');
+                const code = codeEditor.textContent;
+                
+                try {
+                    // 解析代码
+                    const updatedPreset = eval(`(${code})`);
+                    
+                    // 验证必要字段
+                    if (!updatedPreset.exit || !updatedPreset.enter) {
+                        throw new Error('代码缺少必要的exit或enter字段');
+                    }
+                    
+                    // 读取当前JS文件内容
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', 'animations.js', false);
+                    xhr.send();
+                    
+                    if (xhr.status === 200) {
+                        let jsContent = xhr.responseText;
+                        
+                        // 找到PRESET_PAIRS数组
+                        const presetPairsMatch = jsContent.match(/const PRESET_PAIRS = \[(.*?)\];/s);
+                        
+                        if (presetPairsMatch) {
+                            // 解析现有预设
+                            const presets = eval(`[${presetPairsMatch[1]}]`);
+                            
+                            // 找到并更新当前预设
+                            const updatedPresets = presets.map(preset => 
+                                preset.id === this.currentPresetId ? updatedPreset : preset
+                            );
+                            
+                            // 生成新的PRESET_PAIRS字符串
+                            const newPresetPairs = JSON.stringify(updatedPresets, null, 4);
+                            
+                            // 替换JS文件内容
+                            jsContent = jsContent.replace(/const PRESET_PAIRS = \[(.*?)\];/s, 
+                                `const PRESET_PAIRS = [\n${newPresetPairs}\n];`
+                            );
+                            
+                            // 由于没有save_js.php文件，提供手动更新方案
+                            const manualUpdateMessage = `
+代码已准备好替换到animations.js文件。
+
+请按照以下步骤手动更新：
+1. 打开 animations.js 文件
+2. 找到 const PRESET_PAIRS = [...] 部分
+3. 用以下内容替换整个数组：
+
+${newPresetPairs}
+
+4. 保存文件并刷新页面
+
+这样就可以应用您对 ${this.currentPreset.name} 动画的修改了。
+                            `;
+                            
+                            // 显示手动更新提示
+                            alert(manualUpdateMessage);
+                            
+                            // 可选：创建一个下载链接
+                            const blob = new Blob([jsContent], { type: 'application/javascript' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'animations_updated.js';
+                            a.textContent = '下载更新后的animations.js文件';
+                            a.style.display = 'none';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                            
+                        } else {
+                            throw new Error('无法在JS文件中找到PRESET_PAIRS数组');
+                        }
+                    } else {
+                        throw new Error('无法读取animations.js文件');
+                    }
+                } catch (error) {
+                    console.error('替换到JS文件失败:', error);
+                    alert('替换到JS文件失败: ' + error.message);
+                }
+            }
+            
+            bindEvents() {
+                document.getElementById('playBtn').addEventListener('click', () => this.playAnimation());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stopAnimation());
+                document.getElementById('resetBtn').addEventListener('click', () => this.resetAnimation());
+                
+                // 下拉框选择事件
+                document.getElementById('presetSelector').addEventListener('change', (e) => this.selectPreset(e.target.value));
+                
+                // 代码编辑事件
+                document.getElementById('applyCodeBtn').addEventListener('click', () => this.applyCodeChanges());
+                document.getElementById('replaceJsBtn').addEventListener('click', () => this.replaceToJsFile());
+            }
+            
+            playAnimation() {
+                if (!this.currentPreset) {
+                    alert('请先选择一个动画组合');
+                    return;
+                }
+                
+                if (this.isAnimating) {
+                    return;
+                }
+                
+                this.isAnimating = true;
+                
+                try {
+                    // 使用当前预设（可能是编辑过的）
+                    const masterTimeline = this.manager.execute(
+                        this.currentPreset.exit,
+                        this.currentPreset.enter,
+                        this.currentPage,
+                        this.newPage,
+                        this.currentPreset.exitParams || {},
+                        this.currentPreset.enterParams || {}
+                    );
+                    
+                    // 动画完成后标记为结束，不自动重置
+                    masterTimeline.eventCallback("onComplete", () => {
+                        setTimeout(() => {
+                            this.isAnimating = false;
+                        }, 500);
+                    });
+                } catch (error) {
+                    console.error('动画执行失败:', error);
+                    alert('动画执行失败: ' + error.message);
+                    this.isAnimating = false;
+                }
+            }
+            
+            stopAnimation() {
+                this.manager.stop();
+                this.isAnimating = false;
+            }
+            
+            resetAnimation() {
+                this.manager.reset(this.currentPage, this.newPage);
+                this.isAnimating = false;
+            }
+        }
+        
+        // 初始化控制器
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM内容加载完成，开始初始化...');
+            loadGSAPAndAnimations();
+        });
+        
+        // 直接初始化下拉框，确保即使在遇到错误时也能显示基本功能
+        function initSimpleDropdown() {
+            console.log('直接初始化下拉框...');
+            try {
+                const selector = document.getElementById('presetSelector');
+                if (selector) {
+                    console.log('找到下拉框元素，添加基本选项...');
+                    // 添加一些基本选项，确保下拉框有内容
+                    const basicPresets = [
+                        { id: 'slideInOut', name: '滑入滑出' },
+                        { id: 'fadeInOut', name: '淡入淡出' },
+                        { id: 'cameraPush', name: '运镜推近' }
+                    ];
+                    
+                    basicPresets.forEach(preset => {
+                        const option = document.createElement('option');
+                        option.value = preset.id;
+                        option.textContent = preset.name;
+                        selector.appendChild(option);
+                    });
+                    
+                    console.log('基本下拉框初始化完成');
+                } else {
+                    console.error('未找到下拉框元素');
+                }
+            } catch (error) {
+                console.error('直接初始化下拉框失败:', error);
+            }
+        }
+        
+        // 页面加载完成后直接初始化下拉框
+        window.addEventListener('DOMContentLoaded', () => {
+            initSimpleDropdown();
+        });
+    </script>
+</body>
+</html>

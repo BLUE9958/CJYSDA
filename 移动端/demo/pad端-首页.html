@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>场景演示大师 - 扫码连接</title>
+    <style>
+        :root {
+            --accent-blue: #2563eb;
+            --bg-dark: #000000;
+            --glass: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.2);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-dark);
+            font-family: -apple-system, "PingFang SC", sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* 模拟相机背景流光 */
+        .camera-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+            z-index: 0;
+        }
+
+        .overlay {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 0;
+            box-sizing: border-box;
+        }
+
+        /* 顶部标题 */
+        .header {
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            margin: 0;
+        }
+        .header p {
+            font-size: 14px;
+            color: #888;
+            margin-top: 8px;
+        }
+
+        /* 核心扫描框区域 */
+        .scan-container {
+            position: relative;
+            width: 400px; /* 适配 Pad 比例 */
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 扫描框的四个角 */
+        .scan-corner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--accent-blue);
+        }
+        .top-left { top: 0; left: 0; border-right: none; border-bottom: none; border-top-left-radius: 20px; }
+        .top-right { top: 0; right: 0; border-left: none; border-bottom: none; border-top-right-radius: 20px; }
+        .bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; border-bottom-left-radius: 20px; }
+        .bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; border-bottom-right-radius: 20px; }
+
+        /* 扫描动画线 */
+        .scan-line {
+            position: absolute;
+            width: 90%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--accent-blue), transparent);
+            box-shadow: 0 0 15px var(--accent-blue);
+            animation: moveLine 3s infinite ease-in-out;
+        }
+
+        @keyframes moveLine {
+            0% { top: 10%; opacity: 0; }
+            50% { top: 50%; opacity: 1; }
+            100% { top: 90%; opacity: 0; }
+        }
+
+        .scan-tip {
+            margin-top: 30px;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        /* 底部输入区域 (次权重) */
+        .footer-input {
+            width: 380px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .footer-input h3 {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #aaa;
+            font-weight: 400;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            color: white;
+            text-align: center;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        .btn-go {
+            background: var(--accent-blue);
+            border: none;
+            color: white;
+            padding: 0 25px;
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* 装饰：周围暗化 */
+        .mask {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="camera-bg"></div>
+    <div class="mask"></div>
+
+    <div class="overlay">
+        <div class="header">
+            <h1>场景演示大师</h1>
+            <p>SCENE MASTER · PAD TERMINAL</p>
+        </div>
+
+        <div class="scan-area">
+            <div class="scan-container">
+                <div class="scan-corner top-left"></div>
+                <div class="scan-corner top-right"></div>
+                <div class="scan-corner bottom-left"></div>
+                <div class="scan-corner bottom-right"></div>
+                <div class="scan-line"></div>
+                
+                <div style="width: 60px; height: 60px; border: 1px solid rgba(255,255,255,0.1); border-radius: 50%;"></div>
+            </div>
+            <div style="text-align: center;">
+                <p class="scan-tip">将 Pad 对准大屏二维码，即可自动连接</p>
+            </div>
+        </div>
+
+        <div class="footer-input">
+            <h3>或者手动输入会话 ID</h3>
+            <div class="input-group">
+                <input type="text" placeholder="6 位连接码" maxlength="6">
+                <button class="btn-go">连接</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

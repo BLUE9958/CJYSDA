@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .box {
+            width: 100px;
+            height: 100px;
+            background-color: #667eea;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>测试页面</h1>
+    
+    <!-- GSAP测试 -->
+    <div class="test-section">
+        <h2>GSAP库测试</h2>
+        <div class="box" id="testBox"></div>
+        <button class="btn" onclick="testGSAP()">测试GSAP动画</button>
+        <div id="gsapStatus"></div>
+    </div>
+    
+    <!-- 资源文件测试 -->
+    <div class="test-section">
+        <h2>资源文件测试</h2>
+        <img src="A.png" alt="测试图片 A" style="max-width: 200px;">
+        <img src="B.png" alt="测试图片 B" style="max-width: 200px;">
+    </div>
+    
+    <!-- 页面加载测试 -->
+    <div class="test-section">
+        <h2>页面加载测试</h2>
+        <div id="loadStatus"></div>
+    </div>
+    
+    <script>
+        // 页面加载测试
+        window.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('loadStatus').textContent = '页面加载完成！';
+            
+            // 测试GSAP库是否加载
+            if (typeof gsap !== 'undefined') {
+                document.getElementById('gsapStatus').textContent = 'GSAP库加载成功！';
+            } else {
+                document.getElementById('gsapStatus').textContent = 'GSAP库加载失败！';
+            }
+        });
+        
+        // 测试GSAP动画
+        function testGSAP() {
+            if (typeof gsap !== 'undefined') {
+                gsap.to('#testBox', {
+                    x: 200,
+                    rotation: 360,
+                    duration: 1,
+                    ease: "power2.inOut",
+                    onComplete: function() {
+                        gsap.to('#testBox', {
+                            x: 0,
+                            rotation: 0,
+                            duration: 1,
+                            ease: "power2.inOut"
+                        });
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

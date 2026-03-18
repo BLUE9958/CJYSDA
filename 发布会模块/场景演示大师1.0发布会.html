@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>场景演示大师1.0版本发布会</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* 苹果发布会暗黑主题配色 */
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --text-light: #a1a1a6;
+            --accent-color: #8b5cf6;
+            --accent-light: #a78bfa;
+            --border-color: #2c2c2e;
+            --section-padding: 60px 20px;
+            --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            overflow-x: hidden;
+        }
+
+        /* Main Container */
+        .container {
+            width: 100%;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+        }
+
+        .container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Section Styles */
+        section {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            scroll-snap-align: start;
+            position: relative;
+            padding: var(--section-padding);
+            background-color: var(--bg-color);
+        }
+
+        .section-inner {
+            max-width: 1200px;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: var(--transition);
+        }
+
+        section.active .section-inner {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Title Styles */
+        h1 {
+            font-size: 5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            text-align: center;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            text-align: center;
+            letter-spacing: -0.01em;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 40px 0 25px;
+            color: var(--text-color);
+            letter-spacing: -0.01em;
+            text-align: center;
+        }
+
+        h4 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 20px 0 15px;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        /* Content Styles */
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .intro-text {
+            font-size: 1.3rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 60px;
+            color: var(--text-light);
+        }
+
+        /* Divider */
+        .divider {
+            width: 60px;
+            height: 4px;
+            background: var(--accent-color);
+            margin: 40px auto;
+            border-radius: 2px;
+        }
+
+        /* Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px 30px;
+            border-radius: 12px;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        .card h4 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .card p {
+            text-align: left;
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .value-desc {
+            text-align: left;
+            color: var(--accent-light);
+            font-size: 0.95rem;
+            padding: 15px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-color);
+        }
+
+        .value-desc strong {
+            color: var(--accent-color);
+        }
+
+        /* Feature List */
+        .feature-list {
+            max-width: 800px;
+            margin: 40px auto;
+            list-style: none;
+        }
+
+        .feature-item {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-item h5 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .feature-item h5::before {
+            content: "•";
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .feature-item .value-desc {
+            margin-top: 10px;
+        }
+
+        .feature-list li {
+            margin-bottom: 25px;
+            padding: 0;
+            font-size: 1.1rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .feature-list li::before {
+            content: "•";
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        /* Optimization Grid */
+        .optimization-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .optimization-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .optimization-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .optimization-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-color);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
+        }
+
+        .optimization-item:hover::before {
+            transform: scaleX(1);
+        }
+
+        .optimization-item h5 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .optimization-item p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-color);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: var(--text-color);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-header {
+            margin-bottom: 30px;
+        }
+
+        .modal-header h3 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .modal-text {
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        .modal-image {
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 12px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .modal-image .placeholder {
+            font-size: 3rem;
+        }
+
+        .modal-footer {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        /* Responsive Modal */
+        @media (max-width: 768px) {
+            .modal-body {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .dot.active {
+            background: var(--text-color);
+            transform: scale(1.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: radial-gradient(circle at center, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+        }
+
+        .hero h1 {
+            font-size: 6rem;
+            background: linear-gradient(135deg, var(--text-color) 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            h2 {
+                font-size: 2rem;
+            }
+
+            h3 {
+                font-size: 1.5rem;
+            }
+
+            .hero h1 {
+                font-size: 3.5rem;
+            }
+
+            .intro-text {
+                font-size: 1.1rem;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .nav-dots {
+                right: 15px;
+            }
+
+            section {
+                padding: 40px 20px;
+            }
+
+            .card {
+                padding: 30px 20px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--accent-color);
+            z-index: 1000;
+            transition: width 0.1s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar"></div>
+
+    <!-- Navigation Dots -->
+    <div class="nav-dots"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="section-inner">
+                <h1>场景演示大师</h1>
+                <p class="intro-text">展厅多媒体交互场景编辑器的全新升级</p>
+                <div class="divider"></div>
+            </div>
+        </section>
+
+        <!-- Product Overview -->
+        <section id="overview">
+            <div class="section-inner">
+                <h2>产品核心价值</h2>
+                <div class="divider"></div>
+                <p class="intro-text">专为展厅多媒体交互场景打造，提供高效、易用、安全的场景创作体验</p>
+                
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>降低创作门槛</h4>
+                        <p>无需专业代码知识，拖拽式操作快速构建交互场景，让创意轻松实现</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>缩短项目开发周期，降低人力成本，让非技术人员也能参与创作
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>提升协作效率</h4>
+                        <p>支持团队协作与权限管理，实现资源共享与高效协同，加速项目交付</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>打破团队协作壁垒，提高工作效率，确保项目按时交付
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>保障资产安全</h4>
+                        <p>精细化的权限控制，确保数字资产的安全管理，让企业资产无忧</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>保护企业核心数字资产，降低数据泄露风险
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>增强用户体验</h4>
+                        <p>丰富的交互功能，打造沉浸式的多媒体展示效果，提升观众体验</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>提升展厅吸引力，增强观众参与感，更好地传达品牌信息
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Optimizations -->
+        <section id="optimizations">
+            <div class="section-inner">
+                <h2>近期优化与改进</h2>
+                <div class="divider"></div>
+                <p class="intro-text">持续优化产品体验，提升性能和易用性</p>
+                
+                <div class="optimization-grid">
+                    <div class="optimization-item" data-modal="pdf-modal">
+                        <h5>PDF文档支持</h5>
+                        <p>新增PDF文档导入和展示功能</p>
+                    </div>
+                    <div class="optimization-item" data-modal="animation-modal">
+                        <h5>基础动画</h5>
+                        <p>新增淡入淡出、切换等动画效果</p>
+                    </div>
+                    <div class="optimization-item" data-modal="logs-modal">
+                        <h5>更新日志推送</h5>
+                        <p>自动推送新功能和更新内容</p>
+                    </div>
+                    <div class="optimization-item" data-modal="loading-modal">
+                        <h5>资源加载优化</h5>
+                        <p>优化大内存项目的加载机制</p>
+                    </div>
+                    <div class="optimization-item" data-modal="speed-modal">
+                        <h5>编辑速度提升</h5>
+                        <p>优化编辑操作的响应速度</p>
+                    </div>
+                    <div class="optimization-item" data-modal="feedback-modal">
+                        <h5>统一操作反馈</h5>
+                        <p>统一组件的操作反馈效果</p>
+                    </div>
+                    <div class="optimization-item" data-modal="space-modal">
+                        <h5>个人空间升级</h5>
+                        <p>个人项目升级为个人空间</p>
+                    </div>
+                    <div class="optimization-item" data-modal="templates-modal">
+                        <h5>行业模板新增</h5>
+                        <p>新增多套行业场景模板</p>
+                    </div>
+                </div>
+
+                <!-- Modals -->
+                <div id="pdf-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>PDF文档支持</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>新增对PDF文档的导入和展示支持，满足客户对文档类内容的展示需求，扩大产品适用场景。</p>
+                                <p><strong>客户价值：</strong>无需额外工具即可在场景中展示PDF内容，提升场景的完整性和专业性。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">📄</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="animation-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>基础动画效果</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>新增淡入淡出、切换等基础动画效果，丰富场景的交互体验，增强视觉吸引力。</p>
+                                <p><strong>客户价值：</strong>提升场景的生动性和吸引力，更好地传达信息，增强观众参与感。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">✨</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="logs-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>更新日志推送</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>上线更新日志推送功能，所有新功能和更新内容都会自动推送给用户，确保用户第一时间了解产品动态。</p>
+                                <p><strong>客户价值：</strong>及时了解产品进展，增强产品透明度，提升客户粘性。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">📰</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="loading-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>资源加载优化</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>针对大内存项目进行了加载机制优化，提高了兼容性，支持更复杂的大型项目。</p>
+                                <p><strong>客户价值：</strong>能够处理更大规模的项目，提升产品的可靠性和适用性。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">🚀</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="speed-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>编辑速度提升</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>优化了编辑操作的响应速度，操作更流畅，提升创作效率，减少等待时间。</p>
+                                <p><strong>客户价值：</strong>提高创作效率，减少等待时间，优化工作体验。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">⚡</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="feedback-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>统一操作反馈</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>统一多项组件的操作反馈，提升使用流畅度，降低学习成本。</p>
+                                <p><strong>客户价值：</strong>提供一致的操作体验，减少使用中的困惑，提升操作效率。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">🎯</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="space-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>个人空间升级</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>重构项目管理首页，信息结构更清晰，访问更便捷。</p>
+                                <p><strong>客户价值：</strong>提升项目管理效率，降低使用复杂度，更容易上手。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">🏠</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="templates-modal" class="modal">
+                    <div class="modal-content">
+                        <button class="close-btn">&times;</button>
+                        <div class="modal-header">
+                            <h3>行业模板新增</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-text">
+                                <p>新增多套行业场景模板（含运营商、金融等），支持一键启用。</p>
+                                <p><strong>客户价值：</strong>降低创作门槛，快速搭建场景，缩短项目交付周期。</p>
+                            </div>
+                            <div class="modal-image">
+                                <div class="placeholder">🎨</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Enterprise Edition -->
+        <section id="enterprise">
+            <div class="section-inner">
+                <h2>企业版功能发布</h2>
+                <div class="divider"></div>
+                <p class="intro-text">专为团队协作与资产安全管理设计，满足企业级客户需求</p>
+                
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>团队工作空间</h4>
+                        <p>创建专属团队空间，统一管理项目与素材，实现资源共享，提升团队工作效率</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>解决多团队协作痛点，提升团队工作效率，统一管理项目与素材
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>精细化权限体系</h4>
+                        <p>企业-团队-项目三级控制，数字资产集中管控，安全协作机制，降低数据泄露风险</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>满足企业对数字资产安全的需求，降低数据泄露风险，实现安全协作
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>企业级架构</h4>
+                        <p>支持多团队管理，适配复杂组织架构，企业资源统一管控，满足大型企业需求</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>适配复杂组织架构，满足大型企业管理需求，实现资源统一管控
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>完善项目管理</h4>
+                        <p>多种项目模式选择，项目分类与文件夹管理，项目卡片展示与批量操作</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>提升项目管理效率，降低管理成本，优化项目生命周期管理
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Roadmap -->
+        <section id="roadmap">
+            <div class="section-inner">
+                <h2>下一版本规划</h2>
+                <div class="divider"></div>
+                <p class="intro-text">持续创新，增强产品功能，为用户带来更强大的创作能力</p>
+                
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>辅助编辑功能</h4>
+                        <p>参考线、对齐和平均分布功能、标尺系统，提升编辑精度和效率</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>提升编辑精度和效率，帮助客户打造更专业的场景
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>控点打组功能</h4>
+                        <p>支持控点分组管理，提升复杂场景的编辑效率，降低创作难度</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>提升复杂场景的编辑效率，降低创作难度
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>AI生成图片</h4>
+                        <p>通过AI生成场景所需图片资源，降低外部依赖，节省创作成本</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>降低对外部图片资源的依赖，节省创作成本
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>数字人讲解</h4>
+                        <p>自动生成数字人讲解内容，丰富场景展示形式，提升交互体验</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>丰富场景展示形式，提升交互体验
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>更多模板资源</h4>
+                        <p>持续更新行业场景模板，降低创作门槛，缩短项目交付周期</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>降低创作门槛，缩短项目交付周期
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h4>更多控点资源</h4>
+                        <p>丰富控点类型，满足多样化创作需求，提升产品适用性</p>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>满足多样化创作需求，提升产品适用性
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Future Vision -->
+        <section id="future">
+            <div class="section-inner">
+                <h2>未来展望</h2>
+                <div class="divider"></div>
+                <p class="intro-text">持续优化产品体验，引领行业发展</p>
+                
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <h5>提升编辑效率，让用户更快、更轻松地创建高质量场景</h5>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>更快、更轻松地创建高质量场景，提升客户满意度
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <h5>丰富展示形式，引入更多交互效果和媒体类型</h5>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>满足多样化展示效果需求，提升场景吸引力
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <h5>加强协作能力，优化团队协作流程，提升协同效率</h5>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>满足企业日益增长的协作需求，增强产品竞争力
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <h5>拓展行业应用，针对不同行业提供定制化解决方案</h5>
+                        <div class="value-desc">
+                            <strong>客户价值：</strong>深入挖掘行业需求，提供更精准的解决方案
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion -->
+        <section class="footer">
+            <div class="section-inner">
+                <h2>场景演示大师1.0</h2>
+                <div class="divider"></div>
+                <p>展厅多媒体交互场景编辑器的全新升级</p>
+                <p>让我们共同创造更精彩的多媒体交互体验</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Active section detection
+        const container = document.querySelector('.container');
+        const sections = document.querySelectorAll('section');
+        const navDots = document.querySelector('.nav-dots');
+        const progressBar = document.querySelector('.progress-bar');
+
+        // Create navigation dots
+        sections.forEach((section, index) => {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            dot.setAttribute('data-index', index);
+            navDots.appendChild(dot);
+        });
+
+        const dots = document.querySelectorAll('.dot');
+
+        // Intersection Observer for sections
+        const observerOptions = {
+            root: container,
+            rootMargin: '0px',
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    const index = Array.from(sections).indexOf(entry.target);
+                    updateActiveDot(index);
+                } else {
+                    entry.target.classList.remove('active');
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+
+        // Update active dot
+        function updateActiveDot(index) {
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        // Scroll to section when dot is clicked
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const index = parseInt(dot.getAttribute('data-index'));
+                sections[index].scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Update progress bar
+        container.addEventListener('scroll', () => {
+            const scrollTop = container.scrollTop;
+            const scrollHeight = container.scrollHeight - container.clientHeight;
+            const scrollPercentage = (scrollTop / scrollHeight) * 100;
+            progressBar.style.width = `${scrollPercentage}%`;
+        });
+
+        // Initial setup
+        sections[0].classList.add('active');
+        dots[0].classList.add('active');
+
+        // Modal functionality
+        const optimizationItems = document.querySelectorAll('.optimization-item');
+        const modals = document.querySelectorAll('.modal');
+        const closeBtns = document.querySelectorAll('.close-btn');
+
+        // Open modal when optimization item is clicked
+        optimizationItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const modalId = item.getAttribute('data-modal');
+                const modal = document.getElementById(modalId);
+                modal.classList.add('active');
+            });
+        });
+
+        // Close modal when close button is clicked
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modal = btn.closest('.modal');
+                modal.classList.remove('active');
+            });
+        });
+
+        // Close modal when clicking outside
+        modals.forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // Close modal when ESC key is pressed
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modals.forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

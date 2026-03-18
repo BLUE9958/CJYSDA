@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>演示大师 Final Integrated</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --bg-dark: #09090b; --accent: #3b82f6; }
+        body { background-color: var(--bg-dark); color: #f4f4f5; font-family: sans-serif; overflow: hidden; }
+        .glass { background: rgba(18, 18, 20, 0.98); backdrop-filter: blur(25px); border-top: 1px solid rgba(255,255,255,0.1); }
+        .drawer-anim { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .input-dark { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 12px 16px; width: 100%; outline: none; color: white; }
+        .tab-active { color: var(--accent) !important; }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <div id="drawer" class="fixed inset-0 z-[110] pointer-events-none">
+        <div id="drawerBg" onclick="toggleDrawer(false)" class="absolute inset-0 bg-black/70 opacity-0 transition-opacity duration-300"></div>
+        <div id="drawerContent" class="absolute inset-y-0 left-0 w-[85%] bg-[#121214] drawer-anim -translate-x-full pointer-events-auto flex">
+            <div class="w-20 bg-[#09090b] flex flex-col items-center py-8 gap-6 border-r border-zinc-800">
+                <div onclick="renderPersonalSpace()" class="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center font-bold border-2 border-blue-400 cursor-pointer">陈</div>
+                <div onclick="showEnterpriseTeams('广州分公司')" class="w-12 h-12 rounded-2xl bg-zinc-800 flex items-center justify-center text-zinc-400 cursor-pointer">广</div>
+                <div onclick="showEnterpriseTeams('北京电信')" class="w-12 h-12 rounded-2xl bg-zinc-800 flex items-center justify-center text-zinc-400 cursor-pointer">北</div>
+            </div>
+            <div class="flex-1 p-6">
+                <h3 id="drawerTitle" class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-6">切换工作空间</h3>
+                <div id="teamContainer" class="space-y-3">
+                    <p class="text-zinc-600 text-xs mt-10 text-center leading-relaxed">点击左侧图标<br>选择对应的空间团队</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="narrativeSheet" class="fixed inset-0 z-[120] pointer-events-none">
+        <div id="sheetBg" onclick="toggleSheet(false)" class="absolute inset-0 bg-black/60 opacity-0 transition-opacity"></div>
+        <div id="sheetContent" class="absolute bottom-0 inset-x-0 glass rounded-t-3xl p-6 drawer-anim translate-y-full pointer-events-auto">
+            <div class="w-12 h-1 bg-zinc-700 rounded-full mx-auto mb-6"></div>
+            <h3 id="sheetTitle" class="text-lg font-bold mb-4">选择叙事线</h3>
+            <div id="narrativeList" class="space-y-3 max-h-[60vh] overflow-y-auto">
+                </div>
+            <button onclick="toggleSheet(false)" class="w-full mt-6 py-4 text-zinc-500 text-sm">取消</button>
+        </div>
+    </div>
+
+    <div id="connectModal" class="fixed inset-0 z-[130] hidden flex flex-col glass p-8">
+        <div class="flex justify-between items-center mb-8">
+            <button onclick="toggleConnect(false)" class="text-xl p-2"><i class="fas fa-times"></i></button>
+            <div class="flex bg-zinc-800 p-1 rounded-xl">
+                <button id="btnScan" onclick="setConnectMode('scan')" class="px-6 py-2 rounded-lg text-xs bg-zinc-700 font-bold">扫码连接</button>
+                <button id="btnId" onclick="setConnectMode('id')" class="px-6 py-2 rounded-lg text-xs text-zinc-500">输入ID</button>
+            </div>
+            <div class="w-10"></div>
+        </div>
+        <div id="scanView" class="flex-1 flex flex-col items-center justify-center text-center">
+            <div class="w-64 h-64 border-2 border-blue-500 rounded-3xl relative overflow-hidden mb-6">
+                <div class="absolute inset-0 bg-blue-500/10 animate-pulse"></div>
+                <div class="w-full h-1 bg-blue-500 absolute top-0 animate-[bounce_3s_infinite]"></div>
+            </div>
+            <p class="text-zinc-500 text-sm">扫描大屏二维码立即控制</p>
+        </div>
+        <div id="idView" class="hidden flex-1 pt-10 px-4">
+            <input type="text" placeholder="输入 6 位 ID" class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-6 px-4 text-center text-2xl tracking-[0.5em] text-white outline-none focus:border-blue-500">
+            <button onclick="alert('连接中...')" class="w-full mt-8 bg-blue-600 py-4 rounded-2xl font-bold">连接设备</button>
+        </div>
+    </div>
+
+    <div id="loginModal" class="fixed inset-0 z-[150] hidden flex flex-col glass p-10">
+        <div class="flex justify-between items-center mb-10">
+            <button onclick="toggleLogin(false)" class="text-xl p-2"><i class="fas fa-times text-zinc-600"></i></button>
+            <span class="font-bold text-sm">账号登录</span>
+            <div class="w-10"></div>
+        </div>
+        <div class="space-y-5">
+            <input type="text" placeholder="手机号 / 用户名" class="input-dark">
+            <input type="password" placeholder="请输入密码" class="input-dark">
+            <button onclick="doLogin()" class="w-full bg-blue-600 py-4 rounded-xl font-bold active:scale-95 transition">立即登录</button>
+        </div>
+    </div>
+
+    <header class="p-4 flex justify-between items-center bg-[#09090b]">
+        <button onclick="handleMenuClick()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-900 active:scale-90 transition"><i class="fas fa-bars"></i></button>
+        <div class="text-center">
+            <h1 id="headerTitle" class="font-bold text-sm text-zinc-500">场景演示大师</h1>
+        </div>
+        <button onclick="alert('刷新同步成功')" class="w-10 h-10 flex items-center justify-center text-zinc-700"><i class="fas fa-rotate"></i></button>
+    </header>
+
+    <main class="flex-1 relative overflow-hidden">
+        <div id="tab-content" class="h-full overflow-y-auto px-4">
+            <div id="unlogged-guide" class="h-full flex flex-col items-center justify-center text-center p-8">
+                <div class="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center text-zinc-800 mb-6"><i class="fas fa-cloud-lock text-3xl"></i></div>
+                <h3 class="font-bold mb-2">未登录</h3>
+                <p class="text-zinc-600 text-xs px-6 mb-8 leading-relaxed">请登录以同步您的演示项目。<br>临时控制请直接使用下方“扫一扫”。</p>
+                <button onclick="toggleLogin(true)" class="px-10 py-2.5 border border-zinc-800 rounded-full text-xs text-zinc-400 font-bold active:bg-zinc-800">去登录</button>
+            </div>
+            <div id="logged-list" class="hidden pt-4 space-y-4 pb-32"></div>
+        </div>
+
+        <div id="tab-my" class="hidden h-full flex flex-col">
+            <div id="profile-box" class="p-10 flex flex-col items-center"></div>
+            <div class="px-6 space-y-3">
+                <div class="p-4 bg-zinc-900/50 rounded-2xl flex justify-between items-center border border-zinc-800">
+                    <span class="text-sm">设备连接记录</span><i class="fas fa-chevron-right text-xs text-zinc-800"></i>
+                </div>
+                <div id="login-action-box" class="pt-6"></div>
+            </div>
+        </div>
+    </main>
+
+    <nav class="glass border-t border-zinc-800 flex justify-around items-center pt-3 pb-8 fixed bottom-0 w-full z-50 safe-bottom">
+        <div onclick="switchTab('content')" id="nav-content" class="flex flex-col items-center gap-1 tab-active cursor-pointer">
+            <i class="fas fa-compass text-xl"></i><span class="text-[10px]">内容中心</span>
+        </div>
+        <div onclick="toggleConnect(true)" class="relative -top-4 active:scale-95 transition cursor-pointer">
+            <div class="bg-blue-600 w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/40 border-4 border-black text-white">
+                <i class="fas fa-qrcode text-2xl"></i>
+            </div>
+            <span class="text-[10px] absolute -bottom-5 left-1/2 -translate-x-1/2 text-zinc-500">扫一扫</span>
+        </div>
+        <div onclick="switchTab('my')" id="nav-my" class="flex flex-col items-center gap-1 text-zinc-600 cursor-pointer">
+            <i class="fas fa-user-circle text-xl"></i><span class="text-[10px]">我的</span>
+        </div>
+    </nav>
+
+    <script>
+        let isLoggedIn = false;
+
+        // --- 核心业务：登录态 ---
+        function toggleLogin(open) { document.getElementById('loginModal').style.display = open ? 'flex' : 'none'; }
+        function doLogin() {
+            isLoggedIn = true;
+            toggleLogin(false);
+            document.getElementById('unlogged-guide').classList.add('hidden');
+            document.getElementById('logged-list').classList.remove('hidden');
+            document.getElementById('headerTitle').classList.replace('text-zinc-500', 'text-white');
+            renderPersonalSpace();
+            switchTab('content');
+            updateMyPage();
+            alert('登录成功，已为您加载个人空间项目');
+        }
+
+        // --- 【关键找回】1. 企业空间切换逻辑 ---
+        function handleMenuClick() {
+            if(!isLoggedIn) { alert('请先登录后切换工作空间'); toggleLogin(true); }
+            else { toggleDrawer(true); }
+        }
+
+        function toggleDrawer(open) {
+            const content = document.getElementById('drawerContent');
+            const bg = document.getElementById('drawerBg');
+            document.getElementById('drawer').classList.toggle('pointer-events-none', !open);
+            content.classList.toggle('-translate-x-full', !open);
+            bg.classList.toggle('opacity-100', open);
+        }
+
+        function showEnterpriseTeams(entName) {
+            document.getElementById('drawerTitle').innerText = entName;
+            document.getElementById('teamContainer').innerHTML = `
+                <div onclick="loadSpace('${entName}-市场部')" class="p-4 bg-zinc-900 border border-zinc-800 rounded-xl flex justify-between items-center active:bg-zinc-800 transition">
+                    <span class="text-sm">市场展示团队项目</span><i class="fas fa-chevron-right text-xs text-zinc-700"></i>
+                </div>
+                <div onclick="loadSpace('${entName}-交付部')" class="p-4 bg-zinc-900 border border-zinc-800 rounded-xl flex justify-between items-center active:bg-zinc-800 transition">
+                    <span class="text-sm">技术交付演示组</span><i class="fas fa-chevron-right text-xs text-zinc-700"></i>
+                </div>
+            `;
+        }
+
+        function renderPersonalSpace() {
+            document.getElementById('drawerTitle').innerText = "切换工作空间";
+            document.getElementById('teamContainer').innerHTML = `<div onclick="loadSpace('个人空间')" class="p-4 bg-zinc-800/50 rounded-xl text-sm border border-zinc-700">个人私有项目库</div>`;
+            loadSpace('个人空间');
+        }
+
+        function loadSpace(name) {
+            document.getElementById('headerTitle').innerText = name;
+            renderProjectList(name);
+            toggleDrawer(false);
+        }
+
+        // --- 【关键找回】2. 项目卡片渲染 (预览/控制/分享) ---
+        function renderProjectList(spaceName) {
+            const list = document.getElementById('logged-list');
+            list.innerHTML = `<p class="text-[10px] text-zinc-600 uppercase tracking-widest mb-4">当前库: ${spaceName}</p>`;
+            for(let i=1; i<=2; i++) {
+                list.innerHTML += `
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl">
+                        <div class="p-4 flex gap-4">
+                            <div onclick="alert('全屏预览：${spaceName}场景${i}')" class="flex-1 flex gap-4 cursor-pointer">
+                                <div class="w-14 h-14 bg-zinc-800 rounded-xl flex items-center justify-center border border-zinc-700 text-zinc-600"><i class="fas fa-desktop text-lg"></i></div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-sm leading-tight">${spaceName}场景演示 ${i}</h4>
+                                    <p class="text-[10px] text-zinc-500 mt-1 uppercase">Updated 2h ago</p>
+                                </div>
+                            </div>
+                            <button onclick="alert('分享链接已复制')" class="w-8 h-8 text-zinc-700 active:text-blue-500"><i class="fas fa-share-alt text-xs"></i></button>
+                        </div>
+                        <div onclick="toggleSheet(true, '${spaceName}场景 ${i}')" class="bg-blue-600/5 border-t border-zinc-800/50 px-4 py-3.5 flex justify-between items-center active:bg-blue-600/10 transition">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-project-diagram text-blue-500 text-xs"></i>
+                                <span class="text-[11px] font-bold text-blue-400 uppercase tracking-widest">叙事线控制</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-[10px] text-zinc-700"></i>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // --- 【关键找回】3. 叙事线列表弹窗逻辑 ---
+        function toggleSheet(open, projectName = "") {
+            const sheet = document.getElementById('narrativeSheet');
+            const content = document.getElementById('sheetContent');
+            const bg = document.getElementById('sheetBg');
+            if(open) {
+                document.getElementById('sheetTitle').innerText = projectName + " - 叙事线";
+                renderNarrativeLines();
+                sheet.classList.remove('pointer-events-none');
+                content.classList.remove('translate-y-full');
+                bg.classList.replace('opacity-0', 'opacity-100');
+            } else {
+                sheet.classList.add('pointer-events-none');
+                content.classList.add('translate-y-full');
+                bg.classList.replace('opacity-100', 'opacity-0');
+            }
+        }
+
+        function renderNarrativeLines() {
+            const list = document.getElementById('narrativeList');
+            list.innerHTML = `
+                <div onclick="alert('进入控制台：核心业务展示')" class="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl flex justify-between items-center active:bg-blue-600/20 active:border-blue-600/40 transition">
+                    <div>
+                        <p class="text-sm font-bold">核心业务价值叙事线</p>
+                        <p class="text-[10px] text-zinc-600 mt-1">包含 8 个关键锚点 • 已预加载</p>
+                    </div>
+                    <i class="fas fa-play-circle text-blue-500 text-lg"></i>
+                </div>
+                <div onclick="alert('进入控制台：技术底座展示')" class="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl flex justify-between items-center active:bg-blue-600/20">
+                    <div>
+                        <p class="text-sm font-bold">技术底座深度剖析线</p>
+                        <p class="text-[10px] text-zinc-600 mt-1">包含 5 个关键锚点</p>
+                    </div>
+                    <i class="fas fa-play-circle text-blue-500 text-lg"></i>
+                </div>
+            `;
+        }
+
+        // --- 通用导航逻辑 ---
+        function switchTab(tab) {
+            document.getElementById('tab-content').classList.toggle('hidden', tab !== 'content');
+            document.getElementById('tab-my').classList.toggle('hidden', tab !== 'my');
+            document.getElementById('nav-content').classList.toggle('tab-active', tab === 'content');
+            document.getElementById('nav-content').classList.toggle('text-zinc-600', tab !== 'content');
+            document.getElementById('nav-my').classList.toggle('tab-active', tab === 'my');
+            document.getElementById('nav-my').classList.toggle('text-zinc-600', tab !== 'my');
+            if(tab === 'my') updateMyPage();
+        }
+
+        function updateMyPage() {
+            const profile = document.getElementById('profile-box');
+            const action = document.getElementById('login-action-box');
+            if(isLoggedIn) {
+                profile.innerHTML = `<div class="w-20 h-20 rounded-3xl bg-blue-600 flex items-center justify-center text-2xl font-bold mb-4 shadow-xl shadow-blue-500/10">陈</div><h2 class="font-bold">陈产品经理</h2><p class="text-zinc-500 text-[11px] mt-1">高级演示授权 • 企业版</p>`;
+                action.innerHTML = `<button onclick="location.reload()" class="w-full p-4 bg-red-500/5 text-red-500 border border-red-500/10 rounded-2xl text-sm font-medium">退出当前账号</button>`;
+            } else {
+                profile.innerHTML = `<div class="w-20 h-20 rounded-3xl bg-zinc-900 flex items-center justify-center text-zinc-700 text-2xl mb-4"><i class="fas fa-user-secret"></i></div><h2 class="font-bold">访客身份</h2><p class="text-zinc-500 text-[11px] mt-1">登录以同步场景</p>`;
+                action.innerHTML = `<button onclick="toggleLogin(true)" class="w-full bg-blue-600 py-4 rounded-2xl font-bold shadow-lg shadow-blue-500/20">立即登录</button>`;
+            }
+        }
+
+        function toggleConnect(open) { document.getElementById('connectModal').style.display = open ? 'flex' : 'none'; }
+        function setConnectMode(mode) {
+            document.getElementById('scanView').classList.toggle('hidden', mode !== 'scan');
+            document.getElementById('idView').classList.toggle('hidden', mode !== 'id');
+            document.getElementById('btnScan').classList.toggle('bg-zinc-700', mode === 'scan');
+            document.getElementById('btnId').classList.toggle('bg-zinc-700', mode === 'id');
+        }
+
+        // 初始化
+        updateMyPage();
+    </script>
+</body>
+</html>
